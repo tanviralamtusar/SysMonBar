@@ -1,9 +1,24 @@
 <?xml version='1.0' encoding='utf8'?>
-<nuitka-compilation-report nuitka_version="2.8.9" nuitka_commercial_version="not installed" mode="standalone" completion="error exit message (1)" exit_message="Failed unexpectedly in Scons C backend compilation.">
-  <module name="PyQt6" kind="CompiledPythonPackage" usage="import path parent" reason="Instructed by user to follow to all modules." source_path="${sys.prefix}\Lib\site-packages\PyQt6\__init__.py" distribution="PyQt6,PyQt6-Qt6,PyQt6_sip">
-    <plugin-influence name="options-nanny" influence="condition-used" condition="use_pyqt6" tags_used="use_pyqt6" result="false" />
+<nuitka-compilation-report nuitka_version="2.8.9" nuitka_commercial_version="not installed" mode="standalone" completion="exception">
+  <exception exception_type="OSError" exception_value="[Errno 22] Invalid argument">
+Traceback (most recent call last):
+  File "D:\Coding\PC Usage Meter\.venv311\Lib\site-packages\nuitka\MainControl.py", line 1214, in main
+    _main()
+  File "D:\Coding\PC Usage Meter\.venv311\Lib\site-packages\nuitka\MainControl.py", line 1068, in _main
+    executePostProcessing(scons_options["result_exe"])
+  File "D:\Coding\PC Usage Meter\.venv311\Lib\site-packages\nuitka\PostProcessing.py", line 476, in executePostProcessing
+    executePostProcessingResources(
+  File "D:\Coding\PC Usage Meter\.venv311\Lib\site-packages\nuitka\PostProcessing.py", line 363, in executePostProcessingResources
+    _addWindowsIconFromIcons(onefile=onefile)
+  File "D:\Coding\PC Usage Meter\.venv311\Lib\site-packages\nuitka\PostProcessing.py", line 172, in _addWindowsIconFromIcons
+    icon_file.seek(icon.image_offset, 0)
+OSError: [Errno 22] Invalid argument
+</exception>
+  <scons_environment />
+  <module name="PyQt6" kind="CompiledPythonPackage" usage="import path parent" reason="Included to allow post load workaround code." source_path="${sys.prefix}\Lib\site-packages\PyQt6\__init__.py" distribution="PyQt6,PyQt6-Qt6,PyQt6_sip">
+    <plugin-influence name="options-nanny" influence="condition-used" condition="use_pyqt6" tags_used="use_pyqt6" result="true" />
     <plugin-influence name="options-nanny" influence="condition-used" condition="macos and use_pyqt6" tags_used="macos" result="false" />
-    <optimization-time pass="1" time="0.03" micro_passes="5" max_branch_merge="31" merged_total="220" />
+    <optimization-time pass="1" time="0.04" micro_passes="5" max_branch_merge="31" merged_total="220" />
     <optimization-time pass="2" time="0.00" micro_passes="1" max_branch_merge="21" merged_total="41" />
     <module_usages>
       <module_usage name="os" finding="absolute" line="1" />
@@ -12,10 +27,27 @@
       <module_usage name="sys" finding="absolute" line="24" />
     </module_usages>
   </module>
+  <module name="PyQt6-preLoad" kind="CompiledPythonModule" usage="plugins" reason="Adding binary folder to runtime 'PATH' environment variable for proper Qt loading." source_path="${sys.prefix}\Lib\site-packages\PyQt6\PyQt6-preLoad.py">
+    <optimization-time pass="1" time="0.00" micro_passes="3" max_branch_merge="2" merged_total="6" />
+    <optimization-time pass="2" time="0.00" micro_passes="1" max_branch_merge="2" merged_total="2" />
+    <module_usages>
+      <module_usage name="os" finding="absolute" line="1" />
+    </module_usages>
+  </module>
   <module name="PyQt6.QtCore" kind="PythonExtensionModule" usage="import" reason="Extension module needed for standalone mode." source_path="${sys.prefix}\Lib\site-packages\PyQt6\QtCore.pyd" distribution="PyQt6,PyQt6-Qt6,PyQt6_sip">
     <optimization-time pass="1" time="0.01" />
     <optimization-time pass="2" time="0.00" />
     <module_usages />
+  </module>
+  <module name="PyQt6.QtCore-postLoad" kind="CompiledPythonModule" usage="plugins" reason="Setting Qt library path to distribution folder. We need to avoid loading target&#10;system Qt plugins, which may be from another Qt version." source_path="${sys.prefix}\Lib\site-packages\PyQt6\PyQt6\QtCore-postLoad.py" distribution="PyQt6,PyQt6-Qt6,PyQt6_sip">
+    <optimization-time pass="1" time="0.01" micro_passes="3" />
+    <optimization-time pass="2" time="0.00" micro_passes="1" />
+    <module_usages>
+      <module_usage name="__future__" finding="absolute" line="1" />
+      <module_usage name="PyQt6.QtCore" finding="absolute" line="3" />
+      <module_usage name="os" finding="absolute" line="4" />
+      <module_usage name="ntpath" finding="absolute" line="19" />
+    </module_usages>
   </module>
   <module name="PyQt6.QtGui" kind="PythonExtensionModule" usage="import" reason="Extension module needed for standalone mode." source_path="${sys.prefix}\Lib\site-packages\PyQt6\QtGui.pyd" distribution="PyQt6,PyQt6-Qt6,PyQt6_sip">
     <optimization-time pass="1" time="0.01" />
@@ -33,7 +65,7 @@
     <module_usages />
   </module>
   <module name="__future__" kind="UncompiledPythonModule" usage="stdlib" reason="Including as part of the non-excluded parts of standard library." source_path="${sys.real_prefix}\Lib\__future__.py">
-    <optimization-time pass="1" time="0.00" micro_passes="5" max_branch_merge="8" merged_total="81" />
+    <optimization-time pass="1" time="0.01" micro_passes="5" max_branch_merge="8" merged_total="81" />
     <optimization-time pass="2" time="0.00" />
     <module_usages />
   </module>
@@ -43,7 +75,7 @@
     <module_usages />
   </module>
   <module name="__main__" kind="PythonMainModule" usage="root_module" reason="Root module" source_path="${cwd}\main.py">
-    <optimization-time pass="1" time="0.35" micro_passes="5" max_branch_merge="172" merged_total="4095" />
+    <optimization-time pass="1" time="0.33" micro_passes="5" max_branch_merge="172" merged_total="4095" />
     <optimization-time pass="2" time="0.05" micro_passes="1" max_branch_merge="164" merged_total="691" />
     <distribution-usages>
       <distribution-usage name="PyQt6" />
@@ -401,7 +433,7 @@
     <module_usages />
   </module>
   <module name="_collections_abc" kind="UncompiledPythonModule" usage="stdlib" reason="Technically required for CPython library startup." source_path="${sys.real_prefix}\Lib\_collections_abc.py">
-    <optimization-time pass="1" time="0.87" micro_passes="7" max_branch_merge="40" merged_total="14535" />
+    <optimization-time pass="1" time="0.91" micro_passes="7" max_branch_merge="40" merged_total="14535" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="abc" finding="absolute" line="9" />
@@ -447,14 +479,14 @@
     <module_usages />
   </module>
   <module name="_markupbase" kind="UncompiledPythonModule" usage="stdlib" reason="Including as part of the non-excluded parts of standard library." source_path="${sys.real_prefix}\Lib\_markupbase.py">
-    <optimization-time pass="1" time="0.06" micro_passes="5" max_branch_merge="122" merged_total="3464" />
+    <optimization-time pass="1" time="0.07" micro_passes="5" max_branch_merge="122" merged_total="3464" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="re" finding="absolute" line="8" />
     </module_usages>
   </module>
   <module name="_osx_support" kind="UncompiledPythonModule" usage="stdlib" reason="Including as part of the non-excluded parts of standard library." source_path="${sys.real_prefix}\Lib\_osx_support.py">
-    <optimization-time pass="1" time="0.10" micro_passes="7" max_branch_merge="82" merged_total="5490" />
+    <optimization-time pass="1" time="0.11" micro_passes="7" max_branch_merge="82" merged_total="5490" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="os" finding="absolute" line="3" />
@@ -474,7 +506,7 @@
     </module_usages>
   </module>
   <module name="_pydecimal" kind="UncompiledPythonModule" usage="import" reason="Instructed by user to follow to all modules." source_path="${sys.real_prefix}\Lib\_pydecimal.py">
-    <optimization-time pass="1" time="1.38" micro_passes="6" max_branch_merge="273" merged_total="46926" />
+    <optimization-time pass="1" time="1.40" micro_passes="6" max_branch_merge="273" merged_total="46926" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="math" finding="absolute" line="156" />
@@ -489,7 +521,7 @@
     </module_usages>
   </module>
   <module name="_pyio" kind="UncompiledPythonModule" usage="stdlib" reason="Including as part of the non-excluded parts of standard library." source_path="${sys.real_prefix}\Lib\_pyio.py">
-    <optimization-time pass="1" time="0.70" micro_passes="7" max_branch_merge="123" merged_total="26701" />
+    <optimization-time pass="1" time="0.71" micro_passes="7" max_branch_merge="123" merged_total="26701" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="os" finding="absolute" line="5" />
@@ -558,7 +590,7 @@
     </module_usages>
   </module>
   <module name="_weakrefset" kind="UncompiledPythonModule" usage="stdlib" reason="Including as part of the non-excluded parts of standard library." source_path="${sys.real_prefix}\Lib\_weakrefset.py">
-    <optimization-time pass="1" time="0.05" micro_passes="7" max_branch_merge="46" merged_total="2203" />
+    <optimization-time pass="1" time="0.07" micro_passes="7" max_branch_merge="46" merged_total="2203" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="_weakref" finding="absolute" line="5" />
@@ -571,7 +603,7 @@
     <module_usages />
   </module>
   <module name="abc" kind="UncompiledPythonModule" usage="stdlib" reason="Technically required for CPython library startup." source_path="${sys.real_prefix}\Lib\abc.py">
-    <optimization-time pass="1" time="0.06" micro_passes="7" max_branch_merge="28" merged_total="2006" />
+    <optimization-time pass="1" time="0.07" micro_passes="7" max_branch_merge="28" merged_total="2006" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="_abc" finding="absolute" line="85" />
@@ -590,7 +622,7 @@
     </module_usages>
   </module>
   <module name="analytics_window" kind="CompiledPythonModule" usage="import" reason="Instructed by user to follow to all modules." source_path="${cwd}\analytics_window.py">
-    <optimization-time pass="1" time="0.11" micro_passes="5" max_branch_merge="185" merged_total="3777" />
+    <optimization-time pass="1" time="0.10" micro_passes="5" max_branch_merge="185" merged_total="3777" />
     <optimization-time pass="2" time="0.02" micro_passes="1" max_branch_merge="175" merged_total="726" />
     <distribution-usages>
       <distribution-usage name="PyQt6" />
@@ -605,7 +637,7 @@
     </module_usages>
   </module>
   <module name="argparse" kind="UncompiledPythonModule" usage="import" reason="Instructed by user to follow to all modules." source_path="${sys.real_prefix}\Lib\argparse.py">
-    <optimization-time pass="1" time="1.27" micro_passes="7" max_branch_merge="107" merged_total="32302" />
+    <optimization-time pass="1" time="1.85" micro_passes="7" max_branch_merge="107" merged_total="32302" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="os" finding="absolute" line="88" />
@@ -621,7 +653,7 @@
     </module_usages>
   </module>
   <module name="ast" kind="UncompiledPythonModule" usage="stdlib" reason="Technically required for CPython library startup." source_path="${sys.real_prefix}\Lib\ast.py">
-    <optimization-time pass="1" time="1.03" micro_passes="5" max_branch_merge="186" merged_total="24229" />
+    <optimization-time pass="1" time="1.04" micro_passes="5" max_branch_merge="186" merged_total="24229" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="sys" finding="absolute" line="27" />
@@ -635,7 +667,7 @@
     </module_usages>
   </module>
   <module name="base64" kind="UncompiledPythonModule" usage="stdlib" reason="Including as part of the non-excluded parts of standard library." source_path="${sys.real_prefix}\Lib\base64.py">
-    <optimization-time pass="1" time="0.14" micro_passes="7" max_branch_merge="74" merged_total="5509" />
+    <optimization-time pass="1" time="0.15" micro_passes="7" max_branch_merge="74" merged_total="5509" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="re" finding="absolute" line="9" />
@@ -652,7 +684,7 @@
     </module_usages>
   </module>
   <module name="bz2" kind="UncompiledPythonModule" usage="import" reason="Instructed by user to follow to all modules." source_path="${sys.real_prefix}\Lib\bz2.py">
-    <optimization-time pass="1" time="0.04" micro_passes="5" max_branch_merge="66" merged_total="1767" />
+    <optimization-time pass="1" time="0.03" micro_passes="5" max_branch_merge="66" merged_total="1767" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="io" finding="absolute" line="13" />
@@ -662,7 +694,7 @@
     </module_usages>
   </module>
   <module name="calendar" kind="UncompiledPythonModule" usage="stdlib" reason="Including as part of the non-excluded parts of standard library." source_path="${sys.real_prefix}\Lib\calendar.py">
-    <optimization-time pass="1" time="0.46" micro_passes="9" max_branch_merge="51" merged_total="13025" />
+    <optimization-time pass="1" time="0.49" micro_passes="9" max_branch_merge="51" merged_total="13025" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="sys" finding="absolute" line="8" />
@@ -696,8 +728,8 @@
   </module>
   <module name="cffi.api" kind="CompiledPythonModule" usage="import" reason="Instructed by user to follow to all modules." source_path="${sys.prefix}\Lib\site-packages\cffi\api.py" distribution="cffi">
     <plugin-influence name="anti-bloat" influence="condition-used" condition="not use_cffi_recompiler" tags_used="use_cffi_recompiler" result="true" />
-    <optimization-time pass="1" time="0.38" micro_passes="6" max_branch_merge="96" merged_total="9565" />
-    <optimization-time pass="2" time="0.03" micro_passes="1" max_branch_merge="78" merged_total="1451" />
+    <optimization-time pass="1" time="0.89" micro_passes="6" max_branch_merge="96" merged_total="9565" />
+    <optimization-time pass="2" time="0.04" micro_passes="1" max_branch_merge="78" merged_total="1451" />
     <module_usages>
       <module_usage name="sys" finding="absolute" line="1" />
       <module_usage name="types" finding="absolute" line="1" />
@@ -734,7 +766,7 @@
     </module_usages>
   </module>
   <module name="cffi.cparser" kind="CompiledPythonModule" usage="import fromlist" reason="Instructed by user to follow to all modules." source_path="${sys.prefix}\Lib\site-packages\cffi\cparser.py" distribution="cffi">
-    <optimization-time pass="1" time="0.48" micro_passes="7" max_branch_merge="162" merged_total="15353" />
+    <optimization-time pass="1" time="0.46" micro_passes="7" max_branch_merge="162" merged_total="15353" />
     <optimization-time pass="2" time="0.04" micro_passes="1" max_branch_merge="135" merged_total="2113" />
     <distribution-usages>
       <distribution-usage name="pycparser" />
@@ -765,7 +797,7 @@
   </module>
   <module name="cffi.ffiplatform" kind="CompiledPythonModule" usage="import fromlist" reason="Instructed by user to follow to all modules." source_path="${sys.prefix}\Lib\site-packages\cffi\ffiplatform.py" distribution="cffi">
     <plugin-influence name="anti-bloat" influence="condition-used" condition="not use_cffi_recompiler" tags_used="use_cffi_recompiler" result="true" />
-    <optimization-time pass="1" time="0.04" micro_passes="5" max_branch_merge="43" merged_total="916" />
+    <optimization-time pass="1" time="0.03" micro_passes="5" max_branch_merge="43" merged_total="916" />
     <optimization-time pass="2" time="0.00" micro_passes="1" max_branch_merge="29" merged_total="163" />
     <module_usages>
       <module_usage name="sys" finding="absolute" line="1" />
@@ -789,7 +821,7 @@
     </module_usages>
   </module>
   <module name="cffi.model" kind="CompiledPythonModule" usage="import fromlist" reason="Instructed by user to follow to all modules." source_path="${sys.prefix}\Lib\site-packages\cffi\model.py" distribution="cffi">
-    <optimization-time pass="1" time="0.29" micro_passes="6" max_branch_merge="70" merged_total="8579" />
+    <optimization-time pass="1" time="0.30" micro_passes="6" max_branch_merge="70" merged_total="8579" />
     <optimization-time pass="2" time="0.05" micro_passes="1" max_branch_merge="65" merged_total="1328" />
     <module_usages>
       <module_usage name="types" finding="absolute" line="1" />
@@ -810,8 +842,8 @@
     </module_usages>
   </module>
   <module name="cffi.vengine_cpy" kind="CompiledPythonModule" usage="import fromlist" reason="Instructed by user to follow to all modules." source_path="${sys.prefix}\Lib\site-packages\cffi\vengine_cpy.py" distribution="cffi">
-    <optimization-time pass="1" time="0.24" micro_passes="6" max_branch_merge="123" merged_total="9032" />
-    <optimization-time pass="2" time="0.04" micro_passes="1" max_branch_merge="105" merged_total="1395" />
+    <optimization-time pass="1" time="0.22" micro_passes="6" max_branch_merge="123" merged_total="9032" />
+    <optimization-time pass="2" time="0.03" micro_passes="1" max_branch_merge="105" merged_total="1395" />
     <module_usages>
       <module_usage name="sys" finding="absolute" line="4" />
       <module_usage name="cffi" finding="absolute" line="5" />
@@ -823,7 +855,7 @@
     </module_usages>
   </module>
   <module name="cffi.vengine_gen" kind="CompiledPythonModule" usage="import fromlist" reason="Instructed by user to follow to all modules." source_path="${sys.prefix}\Lib\site-packages\cffi\vengine_gen.py" distribution="cffi">
-    <optimization-time pass="1" time="0.25" micro_passes="7" max_branch_merge="72" merged_total="8988" />
+    <optimization-time pass="1" time="0.21" micro_passes="7" max_branch_merge="72" merged_total="8988" />
     <optimization-time pass="2" time="0.03" micro_passes="1" max_branch_merge="61" merged_total="1227" />
     <module_usages>
       <module_usage name="sys" finding="absolute" line="4" />
@@ -837,7 +869,7 @@
     </module_usages>
   </module>
   <module name="cffi.verifier" kind="CompiledPythonModule" usage="import" reason="Instructed by user to follow to all modules." source_path="${sys.prefix}\Lib\site-packages\cffi\verifier.py" distribution="cffi">
-    <optimization-time pass="1" time="0.16" micro_passes="6" max_branch_merge="96" merged_total="3841" />
+    <optimization-time pass="1" time="0.15" micro_passes="6" max_branch_merge="96" merged_total="3841" />
     <optimization-time pass="2" time="0.01" micro_passes="1" max_branch_merge="73" merged_total="600" />
     <module_usages>
       <module_usage name="sys" finding="absolute" line="4" />
@@ -867,7 +899,7 @@
     </module_usages>
   </module>
   <module name="cgi" kind="UncompiledPythonModule" usage="stdlib" reason="Including as part of the non-excluded parts of standard library." source_path="${sys.real_prefix}\Lib\cgi.py">
-    <optimization-time pass="1" time="0.15" micro_passes="6" max_branch_merge="158" merged_total="8017" />
+    <optimization-time pass="1" time="0.16" micro_passes="6" max_branch_merge="158" merged_total="8017" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="io" finding="absolute" line="39" />
@@ -989,7 +1021,7 @@
     </module_usages>
   </module>
   <module name="clr_loader.mono" kind="CompiledPythonModule" usage="import" reason="Instructed by user to follow to all modules." source_path="${sys.prefix}\Lib\site-packages\clr_loader\mono.py" distribution="clr_loader">
-    <optimization-time pass="1" time="0.05" micro_passes="5" max_branch_merge="86" merged_total="1990" />
+    <optimization-time pass="1" time="0.04" micro_passes="5" max_branch_merge="86" merged_total="1990" />
     <optimization-time pass="2" time="0.01" micro_passes="1" max_branch_merge="82" merged_total="363" />
     <module_usages>
       <module_usage name="atexit" finding="absolute" line="1" />
@@ -1053,7 +1085,7 @@
     </module_usages>
   </module>
   <module name="clr_loader.util.coreclr_errors" kind="CompiledPythonModule" usage="import" reason="Instructed by user to follow to all modules." source_path="${sys.prefix}\Lib\site-packages\clr_loader\util\coreclr_errors.py" distribution="clr_loader">
-    <optimization-time pass="1" time="0.06" micro_passes="5" max_branch_merge="21" merged_total="249" />
+    <optimization-time pass="1" time="0.07" micro_passes="5" max_branch_merge="21" merged_total="249" />
     <optimization-time pass="2" time="0.01" micro_passes="1" max_branch_merge="13" merged_total="17" />
     <module_usages>
       <module_usage name="typing" finding="absolute" line="1" />
@@ -1094,7 +1126,7 @@
     </module_usages>
   </module>
   <module name="cmd" kind="UncompiledPythonModule" usage="stdlib" reason="Including as part of the non-excluded parts of standard library." source_path="${sys.real_prefix}\Lib\cmd.py">
-    <optimization-time pass="1" time="0.10" micro_passes="7" max_branch_merge="53" merged_total="4407" />
+    <optimization-time pass="1" time="0.09" micro_passes="7" max_branch_merge="53" merged_total="4407" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="string" finding="absolute" line="45" />
@@ -1115,7 +1147,7 @@
     </module_usages>
   </module>
   <module name="codecs" kind="UncompiledPythonModule" usage="stdlib" reason="Technically required for CPython library startup." source_path="${sys.real_prefix}\Lib\codecs.py">
-    <optimization-time pass="1" time="0.30" micro_passes="5" max_branch_merge="103" merged_total="5066" />
+    <optimization-time pass="1" time="0.14" micro_passes="5" max_branch_merge="103" merged_total="5066" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="builtins" finding="absolute" line="10" />
@@ -1132,7 +1164,7 @@
     </module_usages>
   </module>
   <module name="collections" kind="UncompiledPythonPackage" usage="import" reason="Technically required for CPython library startup." source_path="${sys.real_prefix}\Lib\collections\__init__.py">
-    <optimization-time pass="1" time="0.57" micro_passes="7" max_branch_merge="124" merged_total="16221" />
+    <optimization-time pass="1" time="0.53" micro_passes="7" max_branch_merge="124" merged_total="16221" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="os" finding="absolute" line="1" />
@@ -1165,12 +1197,12 @@
     </module_usages>
   </module>
   <module name="colorsys" kind="UncompiledPythonModule" usage="stdlib" reason="Including as part of the non-excluded parts of standard library." source_path="${sys.real_prefix}\Lib\colorsys.py">
-    <optimization-time pass="1" time="0.01" micro_passes="4" max_branch_merge="31" merged_total="757" />
+    <optimization-time pass="1" time="0.02" micro_passes="4" max_branch_merge="31" merged_total="757" />
     <optimization-time pass="2" time="0.00" />
     <module_usages />
   </module>
   <module name="configparser" kind="UncompiledPythonModule" usage="stdlib" reason="Including as part of the non-excluded parts of standard library." source_path="${sys.real_prefix}\Lib\configparser.py">
-    <optimization-time pass="1" time="0.74" micro_passes="9" max_branch_merge="159" merged_total="21792" />
+    <optimization-time pass="1" time="0.75" micro_passes="9" max_branch_merge="159" merged_total="21792" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="collections.abc" finding="absolute" line="142" />
@@ -1191,7 +1223,7 @@
     </module_usages>
   </module>
   <module name="contextlib" kind="UncompiledPythonModule" usage="stdlib" reason="Technically required for CPython library startup." source_path="${sys.real_prefix}\Lib\contextlib.py">
-    <optimization-time pass="1" time="0.91" micro_passes="6" max_branch_merge="24" merged_total="6872" />
+    <optimization-time pass="1" time="0.26" micro_passes="6" max_branch_merge="24" merged_total="6872" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="abc" finding="absolute" line="2" />
@@ -1212,7 +1244,7 @@
     </module_usages>
   </module>
   <module name="copy" kind="UncompiledPythonModule" usage="stdlib" reason="Including as part of the non-excluded parts of standard library." source_path="${sys.real_prefix}\Lib\copy.py">
-    <optimization-time pass="1" time="0.07" micro_passes="6" max_branch_merge="45" merged_total="2281" />
+    <optimization-time pass="1" time="0.23" micro_passes="6" max_branch_merge="45" merged_total="2281" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="types" finding="absolute" line="51" />
@@ -1230,7 +1262,7 @@
     </module_usages>
   </module>
   <module name="csv" kind="UncompiledPythonModule" usage="import" reason="Instructed by user to follow to all modules." source_path="${sys.real_prefix}\Lib\csv.py">
-    <optimization-time pass="1" time="0.22" micro_passes="9" max_branch_merge="105" merged_total="7494" />
+    <optimization-time pass="1" time="0.29" micro_passes="9" max_branch_merge="105" merged_total="7494" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="re" finding="absolute" line="6" />
@@ -1240,7 +1272,7 @@
     </module_usages>
   </module>
   <module name="ctypes" kind="UncompiledPythonPackage" usage="import" reason="Instructed by user to follow to all modules." source_path="${sys.real_prefix}\Lib\ctypes\__init__.py">
-    <optimization-time pass="1" time="1.24" micro_passes="6" max_branch_merge="50" merged_total="8718" />
+    <optimization-time pass="1" time="1.21" micro_passes="6" max_branch_merge="50" merged_total="8718" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="os" finding="absolute" line="1" />
@@ -1275,7 +1307,7 @@
     </module_usages>
   </module>
   <module name="ctypes._endian" kind="UncompiledPythonModule" usage="import" reason="Instructed by user to follow to all modules." source_path="${sys.real_prefix}\Lib\ctypes\_endian.py">
-    <optimization-time pass="1" time="0.03" micro_passes="5" max_branch_merge="24" merged_total="929" />
+    <optimization-time pass="1" time="0.02" micro_passes="5" max_branch_merge="24" merged_total="929" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="sys" finding="absolute" line="1" />
@@ -1283,7 +1315,7 @@
     </module_usages>
   </module>
   <module name="ctypes.util" kind="UncompiledPythonModule" usage="import" reason="Instructed by user to follow to all modules." source_path="${sys.real_prefix}\Lib\ctypes\util.py">
-    <optimization-time pass="1" time="0.68" micro_passes="9" max_branch_merge="27" merged_total="720" />
+    <optimization-time pass="1" time="0.09" micro_passes="9" max_branch_merge="27" merged_total="720" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="os" finding="absolute" line="1" />
@@ -1295,7 +1327,7 @@
     </module_usages>
   </module>
   <module name="dataclasses" kind="UncompiledPythonModule" usage="stdlib" reason="Including as part of the non-excluded parts of standard library." source_path="${sys.real_prefix}\Lib\dataclasses.py">
-    <optimization-time pass="1" time="0.28" micro_passes="6" max_branch_merge="162" merged_total="9952" />
+    <optimization-time pass="1" time="0.29" micro_passes="6" max_branch_merge="162" merged_total="9952" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="re" finding="absolute" line="1" />
@@ -1314,7 +1346,7 @@
   </module>
   <module name="datetime" kind="UncompiledPythonModule" usage="stdlib" reason="Including as part of the non-excluded parts of standard library." source_path="${sys.real_prefix}\Lib\datetime.py">
     <plugin-influence name="anti-bloat" influence="condition-used" condition="not has_builtin_module(&quot;_datetime&quot;)" tags_used="has_builtin_module" result="false" />
-    <optimization-time pass="1" time="0.65" micro_passes="6" max_branch_merge="179" merged_total="23253" />
+    <optimization-time pass="1" time="0.77" micro_passes="6" max_branch_merge="179" merged_total="23253" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="time" finding="absolute" line="11" />
@@ -1327,7 +1359,7 @@
     </module_usages>
   </module>
   <module name="decimal" kind="UncompiledPythonModule" usage="import" reason="Instructed by user to follow to all modules." source_path="${sys.real_prefix}\Lib\decimal.py">
-    <optimization-time pass="1" time="0.17" micro_passes="3" max_branch_merge="11" merged_total="66" />
+    <optimization-time pass="1" time="0.46" micro_passes="3" max_branch_merge="11" merged_total="66" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="_decimal" finding="absolute" line="3" />
@@ -1341,7 +1373,7 @@
     </module_usages>
   </module>
   <module name="difflib" kind="UncompiledPythonModule" usage="stdlib" reason="Including as part of the non-excluded parts of standard library." source_path="${sys.real_prefix}\Lib\difflib.py">
-    <optimization-time pass="1" time="0.61" micro_passes="8" max_branch_merge="131" merged_total="20240" />
+    <optimization-time pass="1" time="0.63" micro_passes="8" max_branch_merge="131" merged_total="20240" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="heapq" finding="absolute" line="33" />
@@ -1378,7 +1410,7 @@
     </module_usages>
   </module>
   <module name="email._encoded_words" kind="UncompiledPythonModule" usage="import" reason="Instructed by user to follow to all modules." source_path="${sys.real_prefix}\Lib\email\_encoded_words.py">
-    <optimization-time pass="1" time="0.06" micro_passes="6" max_branch_merge="27" merged_total="1581" />
+    <optimization-time pass="1" time="0.07" micro_passes="6" max_branch_merge="27" merged_total="1581" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="re" finding="absolute" line="42" />
@@ -1392,7 +1424,7 @@
     </module_usages>
   </module>
   <module name="email._header_value_parser" kind="UncompiledPythonModule" usage="import fromlist" reason="Instructed by user to follow to all modules." source_path="${sys.real_prefix}\Lib\email\_header_value_parser.py">
-    <optimization-time pass="1" time="3.20" micro_passes="7" max_branch_merge="228" merged_total="55794" />
+    <optimization-time pass="1" time="3.36" micro_passes="7" max_branch_merge="228" merged_total="55794" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="re" finding="absolute" line="70" />
@@ -1409,7 +1441,7 @@
     </module_usages>
   </module>
   <module name="email._parseaddr" kind="UncompiledPythonModule" usage="import" reason="Instructed by user to follow to all modules." source_path="${sys.real_prefix}\Lib\email\_parseaddr.py">
-    <optimization-time pass="1" time="0.17" micro_passes="6" max_branch_merge="164" merged_total="7196" />
+    <optimization-time pass="1" time="0.16" micro_passes="6" max_branch_merge="164" merged_total="7196" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="time" finding="absolute" line="16" />
@@ -1417,7 +1449,7 @@
     </module_usages>
   </module>
   <module name="email._policybase" kind="UncompiledPythonModule" usage="import" reason="Instructed by user to follow to all modules." source_path="${sys.real_prefix}\Lib\email\_policybase.py">
-    <optimization-time pass="1" time="0.10" micro_passes="7" max_branch_merge="40" merged_total="2766" />
+    <optimization-time pass="1" time="0.11" micro_passes="7" max_branch_merge="40" merged_total="2766" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="abc" finding="absolute" line="6" />
@@ -1437,7 +1469,7 @@
     </module_usages>
   </module>
   <module name="email.charset" kind="UncompiledPythonModule" usage="import fromlist" reason="Instructed by user to follow to all modules." source_path="${sys.real_prefix}\Lib\email\charset.py">
-    <optimization-time pass="1" time="0.04" micro_passes="6" max_branch_merge="44" merged_total="1558" />
+    <optimization-time pass="1" time="0.05" micro_passes="6" max_branch_merge="44" merged_total="1558" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="functools" finding="absolute" line="12" />
@@ -1469,12 +1501,12 @@
     </module_usages>
   </module>
   <module name="email.errors" kind="UncompiledPythonModule" usage="import fromlist" reason="Instructed by user to follow to all modules." source_path="${sys.real_prefix}\Lib\email\errors.py">
-    <optimization-time pass="1" time="0.36" micro_passes="6" max_branch_merge="16" merged_total="4934" />
+    <optimization-time pass="1" time="0.28" micro_passes="6" max_branch_merge="16" merged_total="4934" />
     <optimization-time pass="2" time="0.00" />
     <module_usages />
   </module>
   <module name="email.feedparser" kind="UncompiledPythonModule" usage="import" reason="Instructed by user to follow to all modules." source_path="${sys.real_prefix}\Lib\email\feedparser.py">
-    <optimization-time pass="1" time="0.18" micro_passes="6" max_branch_merge="357" merged_total="5209" />
+    <optimization-time pass="1" time="0.16" micro_passes="6" max_branch_merge="357" merged_total="5209" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="re" finding="absolute" line="24" />
@@ -1488,7 +1520,7 @@
     </module_usages>
   </module>
   <module name="email.generator" kind="UncompiledPythonModule" usage="import" reason="Instructed by user to follow to all modules." source_path="${sys.real_prefix}\Lib\email\generator.py">
-    <optimization-time pass="1" time="0.53" micro_passes="5" max_branch_merge="85" merged_total="3408" />
+    <optimization-time pass="1" time="0.07" micro_passes="5" max_branch_merge="85" merged_total="3408" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="re" finding="absolute" line="9" />
@@ -1501,7 +1533,7 @@
     </module_usages>
   </module>
   <module name="email.header" kind="UncompiledPythonModule" usage="import fromlist" reason="Instructed by user to follow to all modules." source_path="${sys.real_prefix}\Lib\email\header.py">
-    <optimization-time pass="1" time="0.17" micro_passes="7" max_branch_merge="48" merged_total="6453" />
+    <optimization-time pass="1" time="0.21" micro_passes="7" max_branch_merge="48" merged_total="6453" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="re" finding="absolute" line="13" />
@@ -1514,7 +1546,7 @@
     </module_usages>
   </module>
   <module name="email.headerregistry" kind="UncompiledPythonModule" usage="import" reason="Instructed by user to follow to all modules." source_path="${sys.real_prefix}\Lib\email\headerregistry.py">
-    <optimization-time pass="1" time="0.44" micro_passes="7" max_branch_merge="29" merged_total="7002" />
+    <optimization-time pass="1" time="0.88" micro_passes="7" max_branch_merge="29" merged_total="7002" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="types" finding="absolute" line="6" />
@@ -1527,7 +1559,7 @@
     </module_usages>
   </module>
   <module name="email.iterators" kind="UncompiledPythonModule" usage="import" reason="Instructed by user to follow to all modules." source_path="${sys.real_prefix}\Lib\email\iterators.py">
-    <optimization-time pass="1" time="0.02" micro_passes="5" max_branch_merge="23" merged_total="506" />
+    <optimization-time pass="1" time="0.01" micro_passes="5" max_branch_merge="23" merged_total="506" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="sys" finding="absolute" line="14" />
@@ -1535,7 +1567,7 @@
     </module_usages>
   </module>
   <module name="email.message" kind="UncompiledPythonModule" usage="import" reason="Instructed by user to follow to all modules." source_path="${sys.real_prefix}\Lib\email\message.py">
-    <optimization-time pass="1" time="0.46" micro_passes="6" max_branch_merge="63" merged_total="10382" />
+    <optimization-time pass="1" time="0.35" micro_passes="6" max_branch_merge="63" merged_total="10382" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="binascii" finding="absolute" line="9" />
@@ -1566,7 +1598,7 @@
     </module_usages>
   </module>
   <module name="email.policy" kind="UncompiledPythonModule" usage="import" reason="Instructed by user to follow to all modules." source_path="${sys.real_prefix}\Lib\email\policy.py">
-    <optimization-time pass="1" time="0.08" micro_passes="5" max_branch_merge="53" merged_total="1014" />
+    <optimization-time pass="1" time="0.07" micro_passes="5" max_branch_merge="53" merged_total="1014" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="re" finding="absolute" line="5" />
@@ -1588,7 +1620,7 @@
   </module>
   <module name="email.utils" kind="UncompiledPythonModule" usage="import fromlist" reason="Instructed by user to follow to all modules." source_path="${sys.real_prefix}\Lib\email\utils.py">
     <plugin-influence name="anti-bloat" influence="condition-used" condition="not has_builtin_module(&quot;_socket&quot;)" tags_used="has_builtin_module" result="true" />
-    <optimization-time pass="1" time="0.35" micro_passes="7" max_branch_merge="35" merged_total="3109" />
+    <optimization-time pass="1" time="0.32" micro_passes="7" max_branch_merge="35" merged_total="3109" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="os" finding="absolute" line="25" />
@@ -1606,7 +1638,7 @@
     </module_usages>
   </module>
   <module name="encodings" kind="UncompiledPythonPackage" usage="stdlib" reason="Technically required for CPython library startup." source_path="${sys.real_prefix}\Lib\encodings\__init__.py">
-    <optimization-time pass="1" time="0.05" micro_passes="6" max_branch_merge="108" merged_total="1571" />
+    <optimization-time pass="1" time="0.04" micro_passes="6" max_branch_merge="108" merged_total="1571" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="os" finding="absolute" line="1" />
@@ -2337,7 +2369,7 @@
     </module_usages>
   </module>
   <module name="encodings.mbcs" kind="UncompiledPythonModule" usage="stdlib" reason="Technically required for CPython library startup." source_path="${sys.real_prefix}\Lib\encodings\mbcs.py">
-    <optimization-time pass="1" time="0.02" micro_passes="4" max_branch_merge="16" merged_total="588" />
+    <optimization-time pass="1" time="0.01" micro_passes="4" max_branch_merge="16" merged_total="588" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="codecs" finding="absolute" line="12" />
@@ -2467,7 +2499,7 @@
     </module_usages>
   </module>
   <module name="encodings.utf_32" kind="UncompiledPythonModule" usage="stdlib" reason="Technically required for CPython library startup." source_path="${sys.real_prefix}\Lib\encodings\utf_32.py">
-    <optimization-time pass="1" time="0.02" micro_passes="4" max_branch_merge="24" merged_total="1222" />
+    <optimization-time pass="1" time="0.03" micro_passes="4" max_branch_merge="24" merged_total="1222" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="codecs" finding="absolute" line="4" />
@@ -2503,7 +2535,7 @@
     </module_usages>
   </module>
   <module name="encodings.utf_8_sig" kind="UncompiledPythonModule" usage="stdlib" reason="Technically required for CPython library startup." source_path="${sys.real_prefix}\Lib\encodings\utf_8_sig.py">
-    <optimization-time pass="1" time="0.02" micro_passes="4" max_branch_merge="24" merged_total="1163" />
+    <optimization-time pass="1" time="0.03" micro_passes="4" max_branch_merge="24" merged_total="1163" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="codecs" finding="absolute" line="10" />
@@ -2528,7 +2560,7 @@
   </module>
   <module name="enum" kind="UncompiledPythonModule" usage="stdlib" reason="Technically required for CPython library startup." source_path="${sys.real_prefix}\Lib\enum.py">
     <plugin-influence name="anti-bloat" influence="condition-used" condition="plugin(&quot;pyside6&quot;)" tags_used="plugin" result="false" />
-    <optimization-time pass="1" time="0.80" micro_passes="7" max_branch_merge="177" merged_total="24797" />
+    <optimization-time pass="1" time="1.50" micro_passes="7" max_branch_merge="177" merged_total="24797" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="sys" finding="absolute" line="1" />
@@ -2542,7 +2574,7 @@
     </module_usages>
   </module>
   <module name="filecmp" kind="UncompiledPythonModule" usage="stdlib" reason="Including as part of the non-excluded parts of standard library." source_path="${sys.real_prefix}\Lib\filecmp.py">
-    <optimization-time pass="1" time="0.04" micro_passes="5" max_branch_merge="55" merged_total="2221" />
+    <optimization-time pass="1" time="0.05" micro_passes="5" max_branch_merge="55" merged_total="2221" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="os" finding="absolute" line="13" />
@@ -2562,7 +2594,7 @@
     </module_usages>
   </module>
   <module name="fileinput" kind="UncompiledPythonModule" usage="stdlib" reason="Including as part of the non-excluded parts of standard library." source_path="${sys.real_prefix}\Lib\fileinput.py">
-    <optimization-time pass="1" time="0.04" micro_passes="5" max_branch_merge="116" merged_total="2699" />
+    <optimization-time pass="1" time="0.05" micro_passes="5" max_branch_merge="116" merged_total="2699" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="io" finding="absolute" line="68" />
@@ -2592,7 +2624,7 @@
     </module_usages>
   </module>
   <module name="fractions" kind="UncompiledPythonModule" usage="import" reason="Instructed by user to follow to all modules." source_path="${sys.real_prefix}\Lib\fractions.py">
-    <optimization-time pass="1" time="0.54" micro_passes="6" max_branch_merge="119" merged_total="5910" />
+    <optimization-time pass="1" time="0.13" micro_passes="6" max_branch_merge="119" merged_total="5910" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="decimal" finding="absolute" line="6" />
@@ -2605,7 +2637,7 @@
     </module_usages>
   </module>
   <module name="ftplib" kind="UncompiledPythonModule" usage="stdlib" reason="Including as part of the non-excluded parts of standard library." source_path="${sys.real_prefix}\Lib\ftplib.py">
-    <optimization-time pass="1" time="1.16" micro_passes="7" max_branch_merge="61" merged_total="10362" />
+    <optimization-time pass="1" time="1.13" micro_passes="7" max_branch_merge="61" merged_total="10362" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="sys" finding="absolute" line="39" />
@@ -2618,7 +2650,7 @@
     </module_usages>
   </module>
   <module name="functools" kind="UncompiledPythonModule" usage="stdlib" reason="Technically required for CPython library startup." source_path="${sys.real_prefix}\Lib\functools.py">
-    <optimization-time pass="1" time="0.71" micro_passes="9" max_branch_merge="69" merged_total="14054" />
+    <optimization-time pass="1" time="0.66" micro_passes="9" max_branch_merge="69" merged_total="14054" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="abc" finding="absolute" line="17" />
@@ -2656,7 +2688,7 @@
     </module_usages>
   </module>
   <module name="gettext" kind="UncompiledPythonModule" usage="stdlib" reason="Including as part of the non-excluded parts of standard library." source_path="${sys.real_prefix}\Lib\gettext.py">
-    <optimization-time pass="1" time="0.22" micro_passes="7" max_branch_merge="73" merged_total="6592" />
+    <optimization-time pass="1" time="0.24" micro_passes="7" max_branch_merge="73" merged_total="6592" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="operator" finding="absolute" line="49" />
@@ -2699,7 +2731,7 @@
     </module_usages>
   </module>
   <module name="gzip" kind="UncompiledPythonModule" usage="stdlib" reason="Including as part of the non-excluded parts of standard library." source_path="${sys.real_prefix}\Lib\gzip.py">
-    <optimization-time pass="1" time="0.13" micro_passes="6" max_branch_merge="80" merged_total="6069" />
+    <optimization-time pass="1" time="0.12" micro_passes="6" max_branch_merge="80" merged_total="6069" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="struct" finding="absolute" line="8" />
@@ -2720,7 +2752,7 @@
     </module_usages>
   </module>
   <module name="hashlib" kind="UncompiledPythonModule" usage="import" reason="Instructed by user to follow to all modules." source_path="${sys.real_prefix}\Lib\hashlib.py">
-    <optimization-time pass="1" time="0.14" micro_passes="7" max_branch_merge="107" merged_total="2380" />
+    <optimization-time pass="1" time="0.13" micro_passes="7" max_branch_merge="107" merged_total="2380" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="_sha1" finding="absolute" line="89" />
@@ -2739,7 +2771,7 @@
   </module>
   <module name="heapq" kind="UncompiledPythonModule" usage="stdlib" reason="Including as part of the non-excluded parts of standard library." source_path="${sys.real_prefix}\Lib\heapq.py">
     <plugin-influence name="anti-bloat" influence="condition-used" condition="not has_builtin_module(&quot;_heapq&quot;)" tags_used="has_builtin_module" result="false" />
-    <optimization-time pass="1" time="0.19" micro_passes="5" max_branch_merge="51" merged_total="3891" />
+    <optimization-time pass="1" time="0.13" micro_passes="5" max_branch_merge="51" merged_total="3891" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="_heapq" finding="absolute" line="583" />
@@ -2851,14 +2883,14 @@
     </module_usages>
   </module>
   <module name="importlib._bootstrap" kind="UncompiledPythonModule" usage="stdlib" reason="Technically required for CPython library startup." source_path="${sys.real_prefix}\Lib\importlib\_bootstrap.py">
-    <optimization-time pass="1" time="0.21" micro_passes="6" max_branch_merge="108" merged_total="11589" />
+    <optimization-time pass="1" time="0.26" micro_passes="6" max_branch_merge="108" merged_total="11589" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="_frozen_importlib_external" finding="absolute" line="1363" />
     </module_usages>
   </module>
   <module name="importlib._bootstrap_external" kind="UncompiledPythonModule" usage="stdlib" reason="Technically required for CPython library startup." source_path="${sys.real_prefix}\Lib\importlib\_bootstrap_external.py">
-    <optimization-time pass="1" time="0.38" micro_passes="6" max_branch_merge="79" merged_total="13077" />
+    <optimization-time pass="1" time="0.39" micro_passes="6" max_branch_merge="79" merged_total="13077" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="_imp" finding="absolute" line="26" />
@@ -2893,7 +2925,7 @@
     </module_usages>
   </module>
   <module name="importlib.machinery" kind="UncompiledPythonModule" usage="stdlib" reason="Technically required for CPython library startup." source_path="${sys.real_prefix}\Lib\importlib\machinery.py">
-    <optimization-time pass="1" time="0.33" micro_passes="3" max_branch_merge="5" merged_total="15" />
+    <optimization-time pass="1" time="0.12" micro_passes="3" max_branch_merge="5" merged_total="15" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="importlib._bootstrap" finding="absolute" line="3" />
@@ -2910,7 +2942,7 @@
     </module_usages>
   </module>
   <module name="importlib.metadata" kind="UncompiledPythonPackage" usage="stdlib" reason="Including as part of the non-excluded parts of standard library." source_path="${sys.real_prefix}\Lib\importlib\metadata\__init__.py">
-    <optimization-time pass="1" time="0.85" micro_passes="7" max_branch_merge="75" merged_total="11628" />
+    <optimization-time pass="1" time="0.89" micro_passes="7" max_branch_merge="75" merged_total="11628" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="os" finding="absolute" line="1" />
@@ -2948,7 +2980,7 @@
     </module_usages>
   </module>
   <module name="importlib.metadata._adapters" kind="UncompiledPythonModule" usage="stdlib" reason="Including as part of the non-excluded parts of standard library." source_path="${sys.real_prefix}\Lib\importlib\metadata\_adapters.py">
-    <optimization-time pass="1" time="0.09" micro_passes="5" max_branch_merge="35" merged_total="744" />
+    <optimization-time pass="1" time="0.07" micro_passes="5" max_branch_merge="35" merged_total="744" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="re" finding="absolute" line="1" />
@@ -2987,7 +3019,7 @@
     </module_usages>
   </module>
   <module name="importlib.metadata._text" kind="UncompiledPythonModule" usage="stdlib" reason="Including as part of the non-excluded parts of standard library." source_path="${sys.real_prefix}\Lib\importlib\metadata\_text.py">
-    <optimization-time pass="1" time="0.02" micro_passes="6" max_branch_merge="19" merged_total="471" />
+    <optimization-time pass="1" time="0.01" micro_passes="6" max_branch_merge="19" merged_total="471" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="re" finding="absolute" line="1" />
@@ -3022,7 +3054,7 @@
     </module_usages>
   </module>
   <module name="importlib.resources._common" kind="UncompiledPythonModule" usage="stdlib" reason="Including as part of the non-excluded parts of standard library." source_path="${sys.real_prefix}\Lib\importlib\resources\_common.py">
-    <optimization-time pass="1" time="0.06" micro_passes="5" max_branch_merge="10" merged_total="422" />
+    <optimization-time pass="1" time="0.29" micro_passes="5" max_branch_merge="10" merged_total="422" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="os" finding="absolute" line="1" />
@@ -3104,7 +3136,7 @@
     </module_usages>
   </module>
   <module name="importlib.util" kind="UncompiledPythonModule" usage="stdlib" reason="Including as part of the non-excluded parts of standard library." source_path="${sys.real_prefix}\Lib\importlib\util.py">
-    <optimization-time pass="1" time="0.06" micro_passes="5" max_branch_merge="44" merged_total="2130" />
+    <optimization-time pass="1" time="0.07" micro_passes="5" max_branch_merge="44" merged_total="2130" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="importlib._abc" finding="absolute" line="2" />
@@ -3128,7 +3160,7 @@
     </module_usages>
   </module>
   <module name="inspect" kind="UncompiledPythonModule" usage="stdlib" reason="Technically required for CPython library startup." source_path="${sys.real_prefix}\Lib\inspect.py">
-    <optimization-time pass="1" time="1.10" micro_passes="7" max_branch_merge="170" merged_total="32889" />
+    <optimization-time pass="1" time="1.12" micro_passes="7" max_branch_merge="170" merged_total="32889" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="abc" finding="absolute" line="136" />
@@ -3172,7 +3204,7 @@
     </module_usages>
   </module>
   <module name="ipaddress" kind="UncompiledPythonModule" usage="stdlib" reason="Including as part of the non-excluded parts of standard library." source_path="${sys.real_prefix}\Lib\ipaddress.py">
-    <optimization-time pass="1" time="0.57" micro_passes="6" max_branch_merge="114" merged_total="17232" />
+    <optimization-time pass="1" time="0.60" micro_passes="6" max_branch_merge="114" merged_total="17232" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="functools" finding="absolute" line="14" />
@@ -3239,7 +3271,7 @@
     </module_usages>
   </module>
   <module name="locale" kind="UncompiledPythonModule" usage="stdlib" reason="Technically required for CPython library startup." source_path="${sys.real_prefix}\Lib\locale.py">
-    <optimization-time pass="1" time="0.23" micro_passes="5" max_branch_merge="89" merged_total="5757" />
+    <optimization-time pass="1" time="0.13" micro_passes="5" max_branch_merge="89" merged_total="5757" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="sys" finding="absolute" line="13" />
@@ -3261,7 +3293,7 @@
     </module_usages>
   </module>
   <module name="logging" kind="UncompiledPythonPackage" usage="import" reason="Instructed by user to follow to all modules." source_path="${sys.real_prefix}\Lib\logging\__init__.py">
-    <optimization-time pass="1" time="0.84" micro_passes="7" max_branch_merge="74" merged_total="17697" />
+    <optimization-time pass="1" time="0.69" micro_passes="7" max_branch_merge="74" merged_total="17697" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="os" finding="absolute" line="1" />
@@ -3338,7 +3370,7 @@
     </module_usages>
   </module>
   <module name="monitor" kind="CompiledPythonModule" usage="import" reason="Instructed by user to follow to all modules." source_path="${cwd}\monitor.py">
-    <optimization-time pass="1" time="0.26" micro_passes="7" max_branch_merge="85" merged_total="2747" />
+    <optimization-time pass="1" time="0.20" micro_passes="7" max_branch_merge="85" merged_total="2747" />
     <optimization-time pass="2" time="0.01" micro_passes="1" max_branch_merge="80" merged_total="379" />
     <distribution-usages>
       <distribution-usage name="psutil" />
@@ -3363,7 +3395,7 @@
     </module_usages>
   </module>
   <module name="netrc" kind="UncompiledPythonModule" usage="stdlib" reason="Including as part of the non-excluded parts of standard library." source_path="${sys.real_prefix}\Lib\netrc.py">
-    <optimization-time pass="1" time="0.05" micro_passes="7" max_branch_merge="124" merged_total="2911" />
+    <optimization-time pass="1" time="0.06" micro_passes="7" max_branch_merge="124" merged_total="2911" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="os" finding="absolute" line="5" />
@@ -3373,7 +3405,7 @@
     </module_usages>
   </module>
   <module name="ntpath" kind="UncompiledPythonModule" usage="import" reason="Technically required for CPython library startup." source_path="${sys.real_prefix}\Lib\ntpath.py">
-    <optimization-time pass="1" time="0.26" micro_passes="7" max_branch_merge="139" merged_total="10912" />
+    <optimization-time pass="1" time="0.24" micro_passes="7" max_branch_merge="139" merged_total="10912" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="os" finding="absolute" line="20" />
@@ -3447,7 +3479,7 @@
     </module_usages>
   </module>
   <module name="pathlib" kind="UncompiledPythonModule" usage="stdlib" reason="Including as part of the non-excluded parts of standard library." source_path="${sys.real_prefix}\Lib\pathlib.py">
-    <optimization-time pass="1" time="1.13" micro_passes="7" max_branch_merge="105" merged_total="17350" />
+    <optimization-time pass="1" time="0.61" micro_passes="7" max_branch_merge="105" merged_total="17350" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="fnmatch" finding="absolute" line="1" />
@@ -3472,7 +3504,7 @@
     </module_usages>
   </module>
   <module name="pickle" kind="UncompiledPythonModule" usage="stdlib" reason="Including as part of the non-excluded parts of standard library." source_path="${sys.real_prefix}\Lib\pickle.py">
-    <optimization-time pass="1" time="0.54" micro_passes="6" max_branch_merge="352" merged_total="17380" />
+    <optimization-time pass="1" time="0.74" micro_passes="6" max_branch_merge="352" merged_total="17380" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="types" finding="absolute" line="26" />
@@ -3617,7 +3649,7 @@
     </module_usages>
   </module>
   <module name="pstats" kind="UncompiledPythonModule" usage="stdlib" reason="Including as part of the non-excluded parts of standard library." source_path="${sys.real_prefix}\Lib\pstats.py">
-    <optimization-time pass="1" time="0.30" micro_passes="7" max_branch_merge="60" merged_total="10871" />
+    <optimization-time pass="1" time="0.28" micro_passes="7" max_branch_merge="60" merged_total="10871" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="sys" finding="absolute" line="23" />
@@ -3632,8 +3664,8 @@
     </module_usages>
   </module>
   <module name="psutil" kind="CompiledPythonPackage" usage="import" reason="Instructed by user to follow to all modules." source_path="${sys.prefix}\Lib\site-packages\psutil\__init__.py" distribution="psutil">
-    <optimization-time pass="1" time="0.79" micro_passes="7" max_branch_merge="137" merged_total="16042" />
-    <optimization-time pass="2" time="0.06" micro_passes="1" max_branch_merge="51" merged_total="2084" />
+    <optimization-time pass="1" time="0.75" micro_passes="7" max_branch_merge="137" merged_total="16042" />
+    <optimization-time pass="2" time="0.07" micro_passes="1" max_branch_merge="51" merged_total="2084" />
     <module_usages>
       <module_usage name="os" finding="absolute" line="1" />
       <module_usage name="collections" finding="absolute" line="21" />
@@ -3723,7 +3755,7 @@
     </module_usages>
   </module>
   <module name="psutil._common" kind="CompiledPythonModule" usage="import fromlist" reason="Instructed by user to follow to all modules." source_path="${sys.prefix}\Lib\site-packages\psutil\_common.py" distribution="psutil">
-    <optimization-time pass="1" time="0.25" micro_passes="7" max_branch_merge="36" merged_total="7748" />
+    <optimization-time pass="1" time="0.24" micro_passes="7" max_branch_merge="36" merged_total="7748" />
     <optimization-time pass="2" time="0.03" micro_passes="1" max_branch_merge="32" merged_total="1025" />
     <module_usages>
       <module_usage name="collections" finding="absolute" line="11" />
@@ -3749,7 +3781,7 @@
   </module>
   <module name="psutil._psaix" kind="CompiledPythonModule" usage="import fromlist" reason="Instructed by user to follow to all modules." source_path="${sys.prefix}\Lib\site-packages\psutil\_psaix.py" distribution="psutil">
     <optimization-time pass="1" time="0.19" micro_passes="7" max_branch_merge="116" merged_total="5974" />
-    <optimization-time pass="2" time="0.02" micro_passes="1" max_branch_merge="54" merged_total="777" />
+    <optimization-time pass="2" time="0.03" micro_passes="1" max_branch_merge="54" merged_total="777" />
     <module_usages>
       <module_usage name="functools" finding="absolute" line="9" />
       <module_usage name="glob" finding="absolute" line="10" />
@@ -3819,7 +3851,7 @@
     </module_usages>
   </module>
   <module name="psutil._pslinux" kind="CompiledPythonModule" usage="import fromlist" reason="Instructed by user to follow to all modules." source_path="${sys.prefix}\Lib\site-packages\psutil\_pslinux.py" distribution="psutil">
-    <optimization-time pass="1" time="1.75" micro_passes="7" max_branch_merge="221" merged_total="30305" />
+    <optimization-time pass="1" time="1.71" micro_passes="7" max_branch_merge="221" merged_total="30305" />
     <optimization-time pass="2" time="0.13" micro_passes="1" max_branch_merge="112" merged_total="4123" />
     <module_usages>
       <module_usage name="base64" finding="absolute" line="8" />
@@ -3931,8 +3963,8 @@
     </module_usages>
   </module>
   <module name="psutil._pssunos" kind="CompiledPythonModule" usage="import fromlist" reason="Instructed by user to follow to all modules." source_path="${sys.prefix}\Lib\site-packages\psutil\_pssunos.py" distribution="psutil">
-    <optimization-time pass="1" time="0.23" micro_passes="7" max_branch_merge="136" merged_total="7639" />
-    <optimization-time pass="2" time="0.04" micro_passes="1" max_branch_merge="64" merged_total="998" />
+    <optimization-time pass="1" time="0.22" micro_passes="7" max_branch_merge="136" merged_total="7639" />
+    <optimization-time pass="2" time="0.03" micro_passes="1" max_branch_merge="64" merged_total="998" />
     <module_usages>
       <module_usage name="errno" finding="absolute" line="7" />
       <module_usage name="functools" finding="absolute" line="8" />
@@ -3971,7 +4003,7 @@
     <module_usages />
   </module>
   <module name="psutil._pswindows" kind="CompiledPythonModule" usage="import fromlist" reason="Instructed by user to follow to all modules." source_path="${sys.prefix}\Lib\site-packages\psutil\_pswindows.py" distribution="psutil">
-    <optimization-time pass="1" time="0.24" micro_passes="6" max_branch_merge="140" merged_total="9167" />
+    <optimization-time pass="1" time="0.25" micro_passes="6" max_branch_merge="140" merged_total="9167" />
     <optimization-time pass="2" time="0.04" micro_passes="1" max_branch_merge="67" merged_total="1391" />
     <module_usages>
       <module_usage name="contextlib" finding="absolute" line="7" />
@@ -4010,7 +4042,7 @@
     </module_usages>
   </module>
   <module name="py_compile" kind="UncompiledPythonModule" usage="import" reason="Instructed by user to follow to all modules." source_path="${sys.real_prefix}\Lib\py_compile.py">
-    <optimization-time pass="1" time="0.15" micro_passes="6" max_branch_merge="79" merged_total="1759" />
+    <optimization-time pass="1" time="0.16" micro_passes="6" max_branch_merge="79" merged_total="1759" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="enum" finding="absolute" line="6" />
@@ -4025,7 +4057,7 @@
     </module_usages>
   </module>
   <module name="pyclbr" kind="UncompiledPythonModule" usage="stdlib" reason="Including as part of the non-excluded parts of standard library." source_path="${sys.real_prefix}\Lib\pyclbr.py">
-    <optimization-time pass="1" time="0.05" micro_passes="5" max_branch_merge="59" merged_total="2307" />
+    <optimization-time pass="1" time="0.06" micro_passes="5" max_branch_merge="59" merged_total="2307" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="ast" finding="absolute" line="44" />
@@ -4034,7 +4066,7 @@
     </module_usages>
   </module>
   <module name="pycparser" kind="UncompiledPythonPackage" usage="import" reason="Instructed by user to follow to all modules." source_path="${sys.prefix}\Lib\site-packages\pycparser\__init__.py" distribution="pycparser">
-    <optimization-time pass="1" time="0.10" micro_passes="4" max_branch_merge="13" merged_total="234" />
+    <optimization-time pass="1" time="0.07" micro_passes="4" max_branch_merge="13" merged_total="234" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="os" finding="absolute" line="1" />
@@ -4059,7 +4091,7 @@
     </module_usages>
   </module>
   <module name="pycparser.c_lexer" kind="UncompiledPythonModule" usage="import" reason="Instructed by user to follow to all modules." source_path="${sys.prefix}\Lib\site-packages\pycparser\c_lexer.py" distribution="pycparser">
-    <optimization-time pass="1" time="0.14" micro_passes="6" max_branch_merge="325" merged_total="3224" />
+    <optimization-time pass="1" time="0.15" micro_passes="6" max_branch_merge="325" merged_total="3224" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="re" finding="absolute" line="9" />
@@ -4069,7 +4101,7 @@
     </module_usages>
   </module>
   <module name="pycparser.c_parser" kind="UncompiledPythonModule" usage="import" reason="Instructed by user to follow to all modules." source_path="${sys.prefix}\Lib\site-packages\pycparser\c_parser.py" distribution="pycparser">
-    <optimization-time pass="1" time="1.16" micro_passes="7" max_branch_merge="214" merged_total="11758" />
+    <optimization-time pass="1" time="1.08" micro_passes="7" max_branch_merge="214" merged_total="11758" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="pycparser.ply" finding="relative" line="9" />
@@ -4094,7 +4126,7 @@
     </module_usages>
   </module>
   <module name="pycparser.ply.lex" kind="UncompiledPythonModule" usage="import fromlist" reason="Instructed by user to follow to all modules." source_path="${sys.prefix}\Lib\site-packages\pycparser\ply\lex.py" distribution="pycparser">
-    <optimization-time pass="1" time="0.59" micro_passes="9" max_branch_merge="203" merged_total="20310" />
+    <optimization-time pass="1" time="0.58" micro_passes="9" max_branch_merge="203" merged_total="20310" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="re" finding="absolute" line="37" />
@@ -4147,14 +4179,14 @@
     <module_usages />
   </module>
   <module name="pythoncom" kind="CompiledPythonModule" usage="import" reason="Instructed by user to follow to all modules." source_path="${sys.prefix}\Lib\site-packages\pythoncom.py" distribution="pywin32">
-    <optimization-time pass="1" time="0.01" micro_passes="4" />
+    <optimization-time pass="1" time="0.00" micro_passes="4" />
     <optimization-time pass="2" time="0.00" micro_passes="1" />
     <module_usages>
       <module_usage name="pywintypes" finding="absolute" line="2" />
     </module_usages>
   </module>
   <module name="pythonnet" kind="CompiledPythonPackage" usage="import" reason="Instructed by user to follow to all modules." source_path="${sys.prefix}\Lib\site-packages\pythonnet\__init__.py" distribution="pythonnet">
-    <optimization-time pass="1" time="0.03" micro_passes="5" max_branch_merge="30" merged_total="765" />
+    <optimization-time pass="1" time="0.02" micro_passes="5" max_branch_merge="30" merged_total="765" />
     <optimization-time pass="2" time="0.00" micro_passes="1" max_branch_merge="27" merged_total="143" />
     <distribution-usages>
       <distribution-usage name="clr_loader" />
@@ -4197,7 +4229,7 @@
     </module_usages>
   </module>
   <module name="quopri" kind="UncompiledPythonModule" usage="stdlib" reason="Technically required for CPython library startup." source_path="${sys.real_prefix}\Lib\quopri.py">
-    <optimization-time pass="1" time="0.05" micro_passes="7" max_branch_merge="124" merged_total="2779" />
+    <optimization-time pass="1" time="0.06" micro_passes="7" max_branch_merge="124" merged_total="2779" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="binascii" finding="absolute" line="15" />
@@ -4227,7 +4259,7 @@
     </module_usages>
   </module>
   <module name="re" kind="UncompiledPythonPackage" usage="stdlib" reason="Technically required for CPython library startup." source_path="${sys.real_prefix}\Lib\re\__init__.py">
-    <optimization-time pass="1" time="0.30" micro_passes="5" max_branch_merge="45" merged_total="1637" />
+    <optimization-time pass="1" time="0.28" micro_passes="5" max_branch_merge="45" merged_total="1637" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="os" finding="absolute" line="1" />
@@ -4248,7 +4280,7 @@
     <module_usages />
   </module>
   <module name="re._compiler" kind="UncompiledPythonModule" usage="stdlib" reason="Technically required for CPython library startup." source_path="${sys.real_prefix}\Lib\re\_compiler.py">
-    <optimization-time pass="1" time="0.58" micro_passes="7" max_branch_merge="419" merged_total="13653" />
+    <optimization-time pass="1" time="0.86" micro_passes="7" max_branch_merge="419" merged_total="13653" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="_sre" finding="absolute" line="13" />
@@ -4267,7 +4299,7 @@
     </module_usages>
   </module>
   <module name="re._parser" kind="UncompiledPythonModule" usage="stdlib" reason="Technically required for CPython library startup." source_path="${sys.real_prefix}\Lib\re\_parser.py">
-    <optimization-time pass="1" time="0.82" micro_passes="7" max_branch_merge="726" merged_total="18318" />
+    <optimization-time pass="1" time="0.95" micro_passes="7" max_branch_merge="726" merged_total="18318" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="re._constants" finding="absolute" line="15" />
@@ -4322,7 +4354,7 @@
     <module_usages />
   </module>
   <module name="selectors" kind="UncompiledPythonModule" usage="import" reason="Instructed by user to follow to all modules." source_path="${sys.real_prefix}\Lib\selectors.py">
-    <optimization-time pass="1" time="0.14" micro_passes="5" max_branch_merge="32" merged_total="5393" />
+    <optimization-time pass="1" time="0.15" micro_passes="5" max_branch_merge="32" merged_total="5393" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="abc" finding="absolute" line="8" />
@@ -4352,7 +4384,7 @@
     </module_usages>
   </module>
   <module name="shlex" kind="UncompiledPythonModule" usage="stdlib" reason="Including as part of the non-excluded parts of standard library." source_path="${sys.real_prefix}\Lib\shlex.py">
-    <optimization-time pass="1" time="0.05" micro_passes="5" max_branch_merge="309" merged_total="3963" />
+    <optimization-time pass="1" time="0.06" micro_passes="5" max_branch_merge="309" merged_total="3963" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="os" finding="absolute" line="10" />
@@ -4367,7 +4399,7 @@
     </module_usages>
   </module>
   <module name="shutil" kind="UncompiledPythonModule" usage="stdlib" reason="Including as part of the non-excluded parts of standard library." source_path="${sys.real_prefix}\Lib\shutil.py">
-    <optimization-time pass="1" time="1.01" micro_passes="7" max_branch_merge="70" merged_total="18569" />
+    <optimization-time pass="1" time="0.56" micro_passes="7" max_branch_merge="70" merged_total="18569" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="os" finding="absolute" line="7" />
@@ -4446,7 +4478,7 @@
     </module_usages>
   </module>
   <module name="sndhdr" kind="UncompiledPythonModule" usage="stdlib" reason="Including as part of the non-excluded parts of standard library." source_path="${sys.real_prefix}\Lib\sndhdr.py">
-    <optimization-time pass="1" time="0.05" micro_passes="5" max_branch_merge="32" merged_total="1566" />
+    <optimization-time pass="1" time="0.04" micro_passes="5" max_branch_merge="32" merged_total="1566" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="warnings" finding="absolute" line="30" />
@@ -4461,7 +4493,7 @@
     </module_usages>
   </module>
   <module name="socket" kind="UncompiledPythonModule" usage="import" reason="Instructed by user to follow to all modules." source_path="${sys.real_prefix}\Lib\socket.py">
-    <optimization-time pass="1" time="0.15" micro_passes="5" max_branch_merge="52" merged_total="6118" />
+    <optimization-time pass="1" time="0.14" micro_passes="5" max_branch_merge="52" merged_total="6118" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="_socket" finding="absolute" line="51" />
@@ -4477,7 +4509,7 @@
     </module_usages>
   </module>
   <module name="socketserver" kind="UncompiledPythonModule" usage="stdlib" reason="Including as part of the non-excluded parts of standard library." source_path="${sys.real_prefix}\Lib\socketserver.py">
-    <optimization-time pass="1" time="0.24" micro_passes="6" max_branch_merge="31" merged_total="6516" />
+    <optimization-time pass="1" time="0.23" micro_passes="6" max_branch_merge="31" merged_total="6516" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="socket" finding="absolute" line="126" />
@@ -4540,7 +4572,7 @@
     </module_usages>
   </module>
   <module name="stat" kind="UncompiledPythonModule" usage="stdlib" reason="Technically required for CPython library startup." source_path="${sys.real_prefix}\Lib\stat.py">
-    <optimization-time pass="1" time="0.02" micro_passes="8" max_branch_merge="9" merged_total="425" />
+    <optimization-time pass="1" time="0.03" micro_passes="8" max_branch_merge="9" merged_total="425" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="_stat" finding="absolute" line="193" />
@@ -4569,7 +4601,7 @@
     </module_usages>
   </module>
   <module name="string" kind="UncompiledPythonModule" usage="stdlib" reason="Including as part of the non-excluded parts of standard library." source_path="${sys.real_prefix}\Lib\string.py">
-    <optimization-time pass="1" time="0.06" micro_passes="5" max_branch_merge="37" merged_total="1941" />
+    <optimization-time pass="1" time="0.05" micro_passes="5" max_branch_merge="37" merged_total="1941" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="_string" finding="absolute" line="21" />
@@ -4595,7 +4627,7 @@
     </module_usages>
   </module>
   <module name="subprocess" kind="UncompiledPythonModule" usage="import" reason="Instructed by user to follow to all modules." source_path="${sys.real_prefix}\Lib\subprocess.py">
-    <optimization-time pass="1" time="0.81" micro_passes="8" max_branch_merge="172" merged_total="25852" />
+    <optimization-time pass="1" time="0.74" micro_passes="8" max_branch_merge="172" merged_total="25852" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="builtins" finding="absolute" line="43" />
@@ -4638,7 +4670,7 @@
   </module>
   <module name="sysconfig" kind="UncompiledPythonModule" usage="stdlib" reason="Including as part of the non-excluded parts of standard library." source_path="${sys.real_prefix}\Lib\sysconfig.py">
     <plugin-influence name="anti-bloat" influence="condition-used" condition="not win32" tags_used="win32" result="false" />
-    <optimization-time pass="1" time="0.16" micro_passes="8" max_branch_merge="98" merged_total="7040" />
+    <optimization-time pass="1" time="0.17" micro_passes="8" max_branch_merge="98" merged_total="7040" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="os" finding="absolute" line="3" />
@@ -4661,7 +4693,7 @@
     </module_usages>
   </module>
   <module name="tarfile" kind="UncompiledPythonModule" usage="stdlib" reason="Including as part of the non-excluded parts of standard library." source_path="${sys.real_prefix}\Lib\tarfile.py">
-    <optimization-time pass="1" time="1.73" micro_passes="7" max_branch_merge="140" merged_total="34956" />
+    <optimization-time pass="1" time="1.39" micro_passes="7" max_branch_merge="140" merged_total="34956" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="sys" finding="absolute" line="40" />
@@ -4701,7 +4733,7 @@
     </module_usages>
   </module>
   <module name="tempfile" kind="UncompiledPythonModule" usage="import" reason="Instructed by user to follow to all modules." source_path="${sys.real_prefix}\Lib\tempfile.py">
-    <optimization-time pass="1" time="0.46" micro_passes="6" max_branch_merge="63" merged_total="5573" />
+    <optimization-time pass="1" time="0.23" micro_passes="6" max_branch_merge="63" merged_total="5573" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="functools" finding="absolute" line="39" />
@@ -4734,7 +4766,7 @@
     </module_usages>
   </module>
   <module name="threading" kind="UncompiledPythonModule" usage="stdlib" reason="Including as part of the non-excluded parts of standard library." source_path="${sys.real_prefix}\Lib\threading.py">
-    <optimization-time pass="1" time="0.36" micro_passes="7" max_branch_merge="55" merged_total="12690" />
+    <optimization-time pass="1" time="0.61" micro_passes="7" max_branch_merge="55" merged_total="12690" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="os" finding="absolute" line="3" />
@@ -4786,7 +4818,7 @@
     <module_usages />
   </module>
   <module name="tokenize" kind="UncompiledPythonModule" usage="stdlib" reason="Technically required for CPython library startup." source_path="${sys.real_prefix}\Lib\tokenize.py">
-    <optimization-time pass="1" time="0.36" micro_passes="9" max_branch_merge="350" merged_total="10213" />
+    <optimization-time pass="1" time="0.54" micro_passes="9" max_branch_merge="350" merged_total="10213" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="codecs" finding="absolute" line="28" />
@@ -4811,7 +4843,7 @@
     </module_usages>
   </module>
   <module name="tomllib._parser" kind="UncompiledPythonModule" usage="stdlib" reason="Including as part of the non-excluded parts of standard library." source_path="${sys.real_prefix}\Lib\tomllib\_parser.py">
-    <optimization-time pass="1" time="0.17" micro_passes="6" max_branch_merge="78" merged_total="7613" />
+    <optimization-time pass="1" time="0.16" micro_passes="6" max_branch_merge="78" merged_total="7613" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="__future__" finding="absolute" line="5" />
@@ -4869,7 +4901,7 @@
     </module_usages>
   </module>
   <module name="traceback" kind="UncompiledPythonModule" usage="import" reason="Including as part of the non-excluded parts of standard library." source_path="${sys.real_prefix}\Lib\traceback.py">
-    <optimization-time pass="1" time="0.48" micro_passes="7" max_branch_merge="128" merged_total="10904" />
+    <optimization-time pass="1" time="0.51" micro_passes="7" max_branch_merge="128" merged_total="10904" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="collections.abc" finding="absolute" line="3" />
@@ -4883,7 +4915,7 @@
     </module_usages>
   </module>
   <module name="tracemalloc" kind="UncompiledPythonModule" usage="stdlib" reason="Including as part of the non-excluded parts of standard library." source_path="${sys.real_prefix}\Lib\tracemalloc.py">
-    <optimization-time pass="1" time="0.45" micro_passes="7" max_branch_merge="28" merged_total="6954" />
+    <optimization-time pass="1" time="0.30" micro_passes="7" max_branch_merge="28" merged_total="6954" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="collections.abc" finding="absolute" line="1" />
@@ -4897,7 +4929,7 @@
     </module_usages>
   </module>
   <module name="types" kind="UncompiledPythonModule" usage="stdlib" reason="Technically required for CPython library startup." source_path="${sys.real_prefix}\Lib\types.py">
-    <optimization-time pass="1" time="0.05" micro_passes="6" max_branch_merge="37" merged_total="1765" />
+    <optimization-time pass="1" time="0.07" micro_passes="6" max_branch_merge="37" merged_total="1765" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="sys" finding="absolute" line="4" />
@@ -4906,7 +4938,7 @@
     </module_usages>
   </module>
   <module name="typing" kind="UncompiledPythonModule" usage="stdlib" reason="Including as part of the non-excluded parts of standard library." source_path="${sys.real_prefix}\Lib\typing.py">
-    <optimization-time pass="1" time="2.60" micro_passes="7" max_branch_merge="148" merged_total="35471" />
+    <optimization-time pass="1" time="2.85" micro_passes="7" max_branch_merge="148" merged_total="35471" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="abc" finding="absolute" line="22" />
@@ -4939,7 +4971,7 @@
     </module_usages>
   </module>
   <module name="urllib.parse" kind="UncompiledPythonModule" usage="import" reason="Instructed by user to follow to all modules." source_path="${sys.real_prefix}\Lib\urllib\parse.py">
-    <optimization-time pass="1" time="1.00" micro_passes="7" max_branch_merge="69" merged_total="14188" />
+    <optimization-time pass="1" time="1.11" micro_passes="7" max_branch_merge="69" merged_total="14188" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="collections" finding="absolute" line="34" />
@@ -4964,7 +4996,7 @@
     </module_usages>
   </module>
   <module name="warnings" kind="UncompiledPythonModule" usage="stdlib" reason="Technically required for CPython library startup." source_path="${sys.real_prefix}\Lib\warnings.py">
-    <optimization-time pass="1" time="0.16" micro_passes="6" max_branch_merge="85" merged_total="5371" />
+    <optimization-time pass="1" time="0.17" micro_passes="6" max_branch_merge="85" merged_total="5371" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="sys" finding="absolute" line="3" />
@@ -4980,7 +5012,7 @@
     </module_usages>
   </module>
   <module name="weakref" kind="UncompiledPythonModule" usage="stdlib" reason="Including as part of the non-excluded parts of standard library." source_path="${sys.real_prefix}\Lib\weakref.py">
-    <optimization-time pass="1" time="0.40" micro_passes="6" max_branch_merge="39" merged_total="8625" />
+    <optimization-time pass="1" time="0.34" micro_passes="6" max_branch_merge="39" merged_total="8625" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="_weakref" finding="absolute" line="12" />
@@ -4995,7 +5027,7 @@
     </module_usages>
   </module>
   <module name="webbrowser" kind="UncompiledPythonModule" usage="stdlib" reason="Including as part of the non-excluded parts of standard library." source_path="${sys.real_prefix}\Lib\webbrowser.py">
-    <optimization-time pass="1" time="0.22" micro_passes="6" max_branch_merge="108" merged_total="7967" />
+    <optimization-time pass="1" time="0.23" micro_passes="6" max_branch_merge="108" merged_total="7967" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="os" finding="absolute" line="5" />
@@ -5041,7 +5073,7 @@
     </module_usages>
   </module>
   <module name="xml.etree.ElementPath" kind="UncompiledPythonModule" usage="import fromlist" reason="Instructed by user to follow to all modules." source_path="${sys.real_prefix}\Lib\xml\etree\ElementPath.py">
-    <optimization-time pass="1" time="0.13" micro_passes="7" max_branch_merge="75" merged_total="5207" />
+    <optimization-time pass="1" time="0.12" micro_passes="7" max_branch_merge="75" merged_total="5207" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="re" finding="absolute" line="59" />
@@ -5088,7 +5120,7 @@
     </module_usages>
   </module>
   <module name="zipfile" kind="UncompiledPythonModule" usage="stdlib" reason="Including as part of the non-excluded parts of standard library." source_path="${sys.real_prefix}\Lib\zipfile.py">
-    <optimization-time pass="1" time="1.18" micro_passes="6" max_branch_merge="177" merged_total="26127" />
+    <optimization-time pass="1" time="1.36" micro_passes="6" max_branch_merge="177" merged_total="26127" />
     <optimization-time pass="2" time="0.00" />
     <module_usages>
       <module_usage name="binascii" finding="absolute" line="6" />
@@ -5135,9 +5167,9 @@
     </module_usages>
   </module>
   <performance>
-    <memory_usage name="after_launch" value="48230400" />
-    <memory_usage name="before_c_code_generation" value="405749760" />
-    <memory_usage name="before_running_scons" value="407867392" />
+    <memory_usage name="after_launch" value="48631808" />
+    <memory_usage name="before_c_code_generation" value="408858624" />
+    <memory_usage name="before_running_scons" value="410025984" />
   </performance>
   <data_file name="icon.ico" source="${cwd}\icon.ico" size="51913" reason="specified data file 'icon.ico=icon.ico' on command line" tags="user,copy" />
   <data_file name="LibreHardwareMonitorLib.dll" source="${cwd}\LibreHardwareMonitorLib.dll" size="708096" reason="specified data file 'LibreHardwareMonitorLib.dll=LibreHardwareMonitorLib.dll' on command line" tags="user,copy" />
@@ -5160,9 +5192,11 @@
   <included_extension name="pyexpat.pyd" dest_path="pyexpat.pyd" source_path="${sys.real_prefix}\DLLs\pyexpat.pyd" package="" ignored="no" reason="used extension module" />
   <included_extension name="select.pyd" dest_path="select.pyd" source_path="${sys.real_prefix}\DLLs\select.pyd" package="" ignored="no" reason="used extension module" />
   <included_extension name="unicodedata.pyd" dest_path="unicodedata.pyd" source_path="${sys.real_prefix}\DLLs\unicodedata.pyd" package="" ignored="no" reason="used extension module" />
-  <data_composer blob_size="7224055" total="11080">
+  <data_composer blob_size="7224538" total="11117">
     <module_data filename="__bytecode.const" blob_name=".bytecode" blob_size="6921743" input_size="6945687" />
     <module_data filename="__constants.const" blob_name="" blob_size="878" input_size="2245" />
+    <module_data filename="module.PyQt6-preLoad.const" blob_name="PyQt6-preLoad" blob_size="186" input_size="411" />
+    <module_data filename="module.PyQt6.QtCore-postLoad.const" blob_name="PyQt6.QtCore-postLoad" blob_size="253" input_size="472" />
     <module_data filename="module.PyQt6.const" blob_name="PyQt6" blob_size="370" input_size="740" />
     <module_data filename="module.__main__.const" blob_name="__main__" blob_size="5206" input_size="9424" />
     <module_data filename="module.analytics.const" blob_name="analytics" blob_size="3000" input_size="4065" />
@@ -5214,6 +5248,8 @@
   </data_composer>
   <command_line>
     <option value="--standalone" />
+    <option value="--mingw64" />
+    <option value="--enable-plugin=pyqt6" />
     <option value="--windows-console-mode=disable" />
     <option value="--windows-icon-from-ico=icon.ico" />
     <option value="--include-data-files=icon.ico=icon.ico" />
@@ -5238,6 +5274,7 @@
     <plugin name="pbr-compat" user_enabled="no" />
     <plugin name="pkg-resources" user_enabled="no" />
     <plugin name="playwright" user_enabled="no" />
+    <plugin name="pyqt6" user_enabled="yes" />
     <plugin name="pywebview" user_enabled="no" />
     <plugin name="spacy" user_enabled="no" />
     <plugin name="transformers" user_enabled="no" />
