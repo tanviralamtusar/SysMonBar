@@ -1,4 +1,4 @@
-# SysMonBar 📊
+# SysMonBar 📊 - System Monitor Bar
 
 A lightweight Windows system monitor that sits on your taskbar, showing real-time stats for CPU, RAM, GPU, Network, Power, and Temperature.
 
