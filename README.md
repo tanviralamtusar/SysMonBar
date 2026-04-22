@@ -87,3 +87,6 @@ MIT License
 
 - [LibreHardwareMonitor](https://github.com/LibreHardwareMonitor/LibreHardwareMonitor) for hardware sensor access
 - [PyQt6](https://www.riverbankcomputing.com/software/pyqt/) for the GUI framework
+
+
+<!-- PR for #5 -->
