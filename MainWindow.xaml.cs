@@ -12,6 +12,8 @@ namespace SysMonBar
         private readonly HardwareMonitor _monitor;
         private readonly DispatcherTimer _updateTimer;
         private readonly DispatcherTimer _topMostTimer;
+        private AppSettings _settings = new();
+        private DateTime _lastLogTime = DateTime.Now;
 
         // Win32 API for staying above taskbar
         [DllImport("user32.dll")]
@@ -30,21 +32,22 @@ namespace SysMonBar
         private const uint SWP_SHOWWINDOW = 0x0040;
         private const int GWL_EXSTYLE = -20;
         private const int WS_EX_TOOLWINDOW = 0x00000080;
-        private const int WS_EX_TOPMOST = 0x00000008;
 
         public MainWindow()
         {
             InitializeComponent();
+
+            // Init database
+            AnalyticsService.EnsureDb();
+
             _monitor = new HardwareMonitor();
 
-            // Hardware stats update every 1 second
             _updateTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
             _updateTimer.Tick += Timer_Tick;
             _updateTimer.Start();
 
-            // Keep window above taskbar every 500ms (like the Python version)
             _topMostTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(500) };
-            _topMostTimer.Tick += TopMostTimer_Tick;
+            _topMostTimer.Tick += (s, e) => ForceTopMost();
             _topMostTimer.Start();
 
             Loaded += MainWindow_Loaded;
@@ -53,16 +56,10 @@ namespace SysMonBar
 
         private void MainWindow_SourceInitialized(object? sender, EventArgs e)
         {
-            // Set WS_EX_TOOLWINDOW style — this makes the window behave like a toolbar:
-            // - Stays above taskbar
-            // - Doesn't appear in Alt+Tab
-            // - Doesn't appear in taskbar
             var hwnd = new WindowInteropHelper(this).Handle;
             int exStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
             exStyle |= WS_EX_TOOLWINDOW;
             SetWindowLong(hwnd, GWL_EXSTYLE, exStyle);
-
-            // Force topmost position
             ForceTopMost();
         }
 
@@ -82,15 +79,8 @@ namespace SysMonBar
         {
             var hwnd = new WindowInteropHelper(this).Handle;
             if (hwnd != IntPtr.Zero)
-            {
                 SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0,
                     SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_SHOWWINDOW);
-            }
-        }
-
-        private void TopMostTimer_Tick(object? sender, EventArgs e)
-        {
-            ForceTopMost();
         }
 
         private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -104,28 +94,86 @@ namespace SysMonBar
             {
                 var stats = _monitor.GetStats();
 
+                // CPU
+                if (_settings.ShowCpu) { CpuMetric.Visibility = Visibility.Visible; }
+                else { CpuMetric.Visibility = Visibility.Collapsed; }
                 CpuMetric.Value = stats.CpuUsage;
                 CpuMetric.ToolTip = $"CPU: {stats.CpuUsage:F0}%";
 
+                // RAM
+                if (_settings.ShowRam) { RamMetric.Visibility = Visibility.Visible; }
+                else { RamMetric.Visibility = Visibility.Collapsed; }
                 RamMetric.Value = stats.RamUsedGb;
                 RamMetric.MaxValue = stats.RamTotalGb;
-                RamMetric.ToolTip = $"RAM: {stats.RamUsedGb:F1}/{stats.RamTotalGb:F1} GB";
+                if (_settings.RamUnit == "MB")
+                    RamMetric.ToolTip = $"RAM: {stats.RamUsedGb * 1024:F0}/{stats.RamTotalGb * 1024:F0} MB";
+                else
+                    RamMetric.ToolTip = $"RAM: {stats.RamUsedGb:F1}/{stats.RamTotalGb:F1} GB";
 
+                // GPU
+                if (_settings.ShowGpu) { GpuMetric.Visibility = Visibility.Visible; }
+                else { GpuMetric.Visibility = Visibility.Collapsed; }
                 GpuMetric.Value = stats.GpuUsage;
                 GpuMetric.ToolTip = $"GPU: {stats.GpuUsage:F0}%";
 
-                NetMetric.Value = stats.NetUp + stats.NetDown;
+                // Network
+                if (_settings.ShowNet) { NetMetric.Visibility = Visibility.Visible; }
+                else { NetMetric.Visibility = Visibility.Collapsed; }
+                double netDown = stats.NetDown;
+                double netUp = stats.NetUp;
+                NetMetric.Value = netDown + netUp;
                 NetMetric.MaxValue = 10;
-                NetMetric.ToolTip = $"Net: ↓{stats.NetDown:F1} ↑{stats.NetUp:F1} MB/s";
+                string netText = FormatNet(netDown, _settings.NetUnit) + " / " + FormatNet(netUp, _settings.NetUnit);
+                NetMetric.ToolTip = $"↓{FormatNet(netDown, _settings.NetUnit)}  ↑{FormatNet(netUp, _settings.NetUnit)}";
 
+                // Power
+                if (_settings.ShowPower) { PowerText.Visibility = Visibility.Visible; }
+                else { PowerText.Visibility = Visibility.Collapsed; }
                 PowerText.Text = $"{stats.PowerWatts:F0}W";
+
+                // Temp
+                if (_settings.ShowTemp) { TempText.Visibility = Visibility.Visible; }
+                else { TempText.Visibility = Visibility.Collapsed; }
                 TempText.Text = $"{stats.CombinedTemp:F0}°C";
                 TempText.ToolTip = $"CPU: {stats.CpuTemp:F0}°C | GPU: {stats.GpuTemp:F0}°C";
+
+                // Log to database every 60 seconds
+                if ((DateTime.Now - _lastLogTime).TotalSeconds >= 60)
+                {
+                    AnalyticsService.LogReading(stats.PowerWatts, stats.CpuTemp, stats.GpuTemp);
+                    _lastLogTime = DateTime.Now;
+                }
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Update error: {ex.Message}");
             }
+        }
+
+        private string FormatNet(double bytesPerSec, string unit)
+        {
+            return unit switch
+            {
+                "mbps" => $"{bytesPerSec * 8 / 1024 / 1024:F2} Mbps",
+                "KB/s" => $"{bytesPerSec / 1024:F1} KB/s",
+                "MB/s" => $"{bytesPerSec / 1024 / 1024:F2} MB/s",
+                _ => $"{bytesPerSec * 8 / 1024:F1} kbps"
+            };
+        }
+
+        public void OpenSettings()
+        {
+            var dlg = new SettingsWindow(_settings);
+            if (dlg.ShowDialog() == true && dlg.Saved)
+            {
+                _settings = dlg.Settings;
+            }
+        }
+
+        public void OpenAnalytics()
+        {
+            var dlg = new AnalyticsWindow();
+            dlg.ShowDialog();
         }
 
         protected override void OnClosed(EventArgs e)

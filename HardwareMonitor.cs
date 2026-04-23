@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using LibreHardwareMonitor.Hardware;
 
@@ -22,7 +21,6 @@ namespace SysMonBar
     public class HardwareMonitor : IDisposable
     {
         private readonly Computer _computer;
-        private DateTime _lastTime;
 
         public HardwareMonitor()
         {
@@ -34,78 +32,134 @@ namespace SysMonBar
                 IsNetworkEnabled = true
             };
             _computer.Open();
-            _lastTime = DateTime.Now;
+        }
+
+        private void UpdateSubHardware(IHardware hardware)
+        {
+            foreach (var sub in hardware.SubHardware)
+            {
+                sub.Update();
+                UpdateSubHardware(sub);
+            }
         }
 
         public HardwareStats GetStats()
         {
             var stats = new HardwareStats();
-            var currentTime = DateTime.Now;
-            var timeDiff = (currentTime - _lastTime).TotalSeconds;
+            float cpuPower = 0;
+            float gpuPower = 0;
 
             foreach (var hardware in _computer.Hardware)
             {
                 hardware.Update();
+                UpdateSubHardware(hardware);
 
-                // CPU
-                if (hardware.HardwareType == HardwareType.Cpu)
+                var hwType = hardware.HardwareType;
+
+                // ── CPU ──
+                if (hwType == HardwareType.Cpu)
                 {
                     foreach (var sensor in hardware.Sensors)
                     {
-                        if (sensor.SensorType == SensorType.Load && sensor.Name == "CPU Total")
-                            stats.CpuUsage = sensor.Value ?? 0;
-                        else if (sensor.SensorType == SensorType.Power && (sensor.Name == "CPU Package" || sensor.Name == "Package"))
-                            stats.PowerWatts += sensor.Value ?? 0;
-                        else if (sensor.SensorType == SensorType.Temperature && (sensor.Name == "Core (Tctl/Tdie)" || sensor.Name == "CPU Package"))
-                            stats.CpuTemp = sensor.Value ?? 0;
-                    }
-                }
+                        var val = sensor.Value ?? 0;
+                        if (val <= 0) continue;
 
-                // GPU
-                if (hardware.HardwareType == HardwareType.GpuNvidia || hardware.HardwareType == HardwareType.GpuAmd || hardware.HardwareType == HardwareType.GpuIntel)
-                {
-                    foreach (var sensor in hardware.Sensors)
-                    {
-                        if (sensor.SensorType == SensorType.Load && (sensor.Name == "GPU Core" || sensor.Name == "D3D 3D"))
-                            stats.GpuUsage = sensor.Value ?? 0;
-                        else if (sensor.SensorType == SensorType.Temperature && sensor.Name == "GPU Core")
-                            stats.GpuTemp = sensor.Value ?? 0;
-                        else if (sensor.SensorType == SensorType.Power && sensor.Name == "GPU Package")
-                            stats.PowerWatts += sensor.Value ?? 0;
-                    }
-                }
-
-                // RAM
-                if (hardware.HardwareType == HardwareType.Memory)
-                {
-                    foreach (var sensor in hardware.Sensors)
-                    {
-                        if (sensor.Name == "Memory Used")
-                            stats.RamUsedGb = sensor.Value ?? 0;
-                        else if (sensor.Name == "Memory Available")
+                        if (sensor.SensorType == SensorType.Load &&
+                            sensor.Name.Contains("Total", StringComparison.OrdinalIgnoreCase))
                         {
-                            // We'll calculate total later or from other sensors
+                            stats.CpuUsage = val;
+                        }
+                        else if (sensor.SensorType == SensorType.Power)
+                        {
+                            // Take the highest power reading (Package > individual cores)
+                            if (sensor.Name.Contains("Package", StringComparison.OrdinalIgnoreCase) || val > cpuPower)
+                                cpuPower = val;
+                        }
+                        else if (sensor.SensorType == SensorType.Temperature)
+                        {
+                            // Prefer Tctl/Tdie (AMD) or Package (Intel), fallback to any
+                            if (sensor.Name.Contains("Tctl", StringComparison.OrdinalIgnoreCase) ||
+                                sensor.Name.Contains("Package", StringComparison.OrdinalIgnoreCase) ||
+                                stats.CpuTemp == 0)
+                            {
+                                stats.CpuTemp = val;
+                            }
                         }
                     }
-                    // Simple fallback for total RAM if needed, but usually we can get it from sensor
-                    stats.RamTotalGb = stats.RamUsedGb + (hardware.Sensors.FirstOrDefault(s => s.Name == "Memory Available")?.Value ?? 0);
                 }
 
-                // Network
-                if (hardware.HardwareType == HardwareType.Network)
+                // ── GPU ──
+                if (hwType == HardwareType.GpuNvidia ||
+                    hwType == HardwareType.GpuAmd ||
+                    hwType == HardwareType.GpuIntel)
+                {
+                    foreach (var sensor in hardware.Sensors)
+                    {
+                        var val = sensor.Value ?? 0;
+                        if (val <= 0) continue;
+
+                        if (sensor.SensorType == SensorType.Load)
+                        {
+                            // Prefer "D3D 3D" (actual usage), fallback to "GPU Core"
+                            if (sensor.Name.Contains("D3D 3D", StringComparison.OrdinalIgnoreCase))
+                                stats.GpuUsage = val;
+                            else if (sensor.Name.Contains("Core", StringComparison.OrdinalIgnoreCase) && stats.GpuUsage == 0)
+                                stats.GpuUsage = val;
+                        }
+                        else if (sensor.SensorType == SensorType.Temperature &&
+                                 sensor.Name.Contains("Core", StringComparison.OrdinalIgnoreCase))
+                        {
+                            stats.GpuTemp = val;
+                        }
+                        else if (sensor.SensorType == SensorType.Power)
+                        {
+                            if (val > gpuPower) gpuPower = val;
+                        }
+                    }
+                }
+
+                // ── RAM ──
+                if (hwType == HardwareType.Memory)
+                {
+                    float used = 0, available = 0;
+                    foreach (var sensor in hardware.Sensors)
+                    {
+                        if (sensor.SensorType == SensorType.Data)
+                        {
+                            if (sensor.Name.Contains("Used", StringComparison.OrdinalIgnoreCase))
+                                used = sensor.Value ?? 0;
+                            else if (sensor.Name.Contains("Available", StringComparison.OrdinalIgnoreCase))
+                                available = sensor.Value ?? 0;
+                        }
+                    }
+                    stats.RamUsedGb = used;
+                    stats.RamTotalGb = used + available;
+                }
+
+                // ── Network ──
+                if (hwType == HardwareType.Network)
                 {
                     foreach (var sensor in hardware.Sensors)
                     {
                         if (sensor.SensorType == SensorType.Throughput)
                         {
-                            if (sensor.Name == "Upload Speed") stats.NetUp += sensor.Value ?? 0;
-                            if (sensor.Name == "Download Speed") stats.NetDown += sensor.Value ?? 0;
+                            var val = sensor.Value ?? 0;
+                            if (sensor.Name.Contains("Upload", StringComparison.OrdinalIgnoreCase))
+                                stats.NetUp += val;
+                            else if (sensor.Name.Contains("Download", StringComparison.OrdinalIgnoreCase))
+                                stats.NetDown += val;
                         }
                     }
                 }
             }
 
-            _lastTime = currentTime;
+            // Combine power
+            stats.PowerWatts = cpuPower + gpuPower;
+
+            // Fallback: estimate power from CPU usage if sensors report 0
+            if (stats.PowerWatts < 1)
+                stats.PowerWatts = 15 + (stats.CpuUsage / 100f) * 50f;
+
             return stats;
         }
 

@@ -15,6 +15,8 @@ public partial class App : Application
         SetupTrayIcon();
     }
 
+    private MainWindow? GetMainWin() => MainWindow as MainWindow;
+
     private void SetupTrayIcon()
     {
         _trayIcon = new System.Windows.Forms.NotifyIcon();
@@ -34,8 +36,8 @@ public partial class App : Application
         _trayIcon.Visible = true;
 
         var menu = new System.Windows.Forms.ContextMenuStrip();
-        menu.Items.Add("📊 Analytics", null, (s, ev) => { /* TODO */ });
-        menu.Items.Add("⚙️ Settings", null, (s, ev) => { /* TODO */ });
+        menu.Items.Add("📊 Analytics", null, (s, ev) => GetMainWin()?.OpenAnalytics());
+        menu.Items.Add("⚙️ Settings", null, (s, ev) => GetMainWin()?.OpenSettings());
         menu.Items.Add(new System.Windows.Forms.ToolStripSeparator());
         menu.Items.Add("❌ Exit", null, (s, ev) => Shutdown());
 
