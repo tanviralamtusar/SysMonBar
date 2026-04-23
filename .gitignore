@@ -1,28 +1,25 @@
-# Virtual environments
-.venv/
-.venv311/
-venv/
+# Build output
+bin/
+obj/
 
-# Python cache
-__pycache__/
-*.py[cod]
-*$py.class
-
-# PyInstaller
-build/
-dist/
-*.spec
-
-# Database (user data)
+# User data
 *.db
 
-# Logs
-*.log
-
 # IDE
+.vs/
 .vscode/
 .idea/
+*.user
+*.suo
 
 # OS
 Thumbs.db
 .DS_Store
+
+# Python archive (kept for reference)
+py_archive/
+
+# Logs / crash reports
+*.log
+*.xml
+!app.manifest
