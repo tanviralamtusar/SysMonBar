@@ -2,82 +2,64 @@
 
 A lightweight Windows system monitor that sits on your taskbar, showing real-time stats for CPU, RAM, GPU, Network, Power, and Temperature.
 
+Built natively in **C# / WPF** for maximum performance and minimal resource usage.
+
 ![SysMonBar Preview](icon.png)
 
 ## Features
 
-- 🖥️ **CPU Usage** - Real-time CPU load with bar/graph display
-- 💾 **RAM Usage** - Memory consumption in GB or MB
+- 🖥️ **CPU Usage** - Real-time CPU load with bar display
+- 💾 **RAM Usage** - Memory consumption in GB
 - 🎮 **GPU Usage** - GPU load via LibreHardwareMonitor
-- 🌐 **Network** - Upload/Download speeds (kbps, mbps, KB/s, MB/s)
+- 🌐 **Network** - Upload/Download throughput
 - ⚡ **Power** - CPU/GPU power consumption in watts
 - 🌡️ **Temperature** - Combined CPU/GPU temperature
-- 📈 **Analytics** - Track power consumption over 24h, 7d, 30d with charts
-- 💰 **Cost Calculator** - Estimate electricity costs in 70+ currencies
+- 🔔 **System Tray** - Runs quietly with tray icon and context menu
 
 ## Requirements
 
 - Windows 10/11
-- Python 3.11 (for development)
-- [LibreHardwareMonitorLib.dll](https://github.com/LibreHardwareMonitor/LibreHardwareMonitor) - for hardware monitoring
+- .NET 8.0 SDK (for development)
+- Run as **Administrator** for full sensor access
 
-## Installation
+## Build & Run
 
-### From Release (Recommended)
-1. Download the latest release
-2. Extract to a folder
-3. Run `SysMonBar.exe` as Administrator
-
-### From Source
 ```bash
 # Clone the repository
 git clone https://github.com/YOUR_USERNAME/SysMonBar.git
 cd SysMonBar
 
-# Create virtual environment (Python 3.11)
-py -3.11 -m venv .venv
-.venv\Scripts\activate
+# Build
+dotnet build
 
-# Install dependencies
-pip install PyQt6 psutil wmi pywin32 pythonnet
-
-# Run the app
-python main.py
+# Run (requires Administrator)
+dotnet run
 ```
 
-## Usage
-
-- **Right-click** on the bar to access Settings or Analytics
-- **System tray icon** also provides quick access
-- Run as **Administrator** for full sensor access (power, temps)
-
-## Settings
-
-- Toggle visibility for each metric
-- Customize colors
-- Choose bar or graph display
-- Select network speed units
-- Enable/disable run on startup
-
-## Building EXE
+## Publish as EXE
 
 ```bash
-pip install pyinstaller
-pyinstaller --onefile --windowed --icon=icon.png --name=SysMonBar --add-data="icon.png;." --add-data="LibreHardwareMonitorLib.dll;." main.py
+dotnet publish -c Release -r win-x64 --self-contained -p:PublishSingleFile=true
 ```
 
-The EXE will be in the `dist` folder.
+The EXE will be in `bin/Release/net8.0-windows/win-x64/publish/`.
 
-## Files
+## Project Structure
 
 | File | Description |
 |------|-------------|
-| `main.py` | Main application and UI |
-| `monitor.py` | System monitoring thread |
-| `settings.py` | Settings dialog |
-| `analytics.py` | SQLite database for power data |
-| `analytics_window.py` | Analytics charts and stats |
-| `LibreHardwareMonitorLib.dll` | Hardware monitoring library |
+| `MainWindow.xaml/.cs` | Main transparent bar UI |
+| `MetricControl.xaml/.cs` | Reusable bar widget for metrics |
+| `HardwareMonitor.cs` | Hardware sensor reading via LibreHardwareMonitor |
+| `App.xaml/.cs` | Application entry, system tray icon |
+| `app.manifest` | Admin privilege request |
+
+## Tech Stack
+
+- **Language:** C# 12
+- **Framework:** .NET 8.0 / WPF
+- **Hardware:** LibreHardwareMonitorLib (NuGet)
+- **Database:** Entity Framework Core + SQLite (for analytics)
 
 ## License
 
@@ -86,4 +68,3 @@ MIT License
 ## Credits
 
 - [LibreHardwareMonitor](https://github.com/LibreHardwareMonitor/LibreHardwareMonitor) for hardware sensor access
-- [PyQt6](https://www.riverbankcomputing.com/software/pyqt/) for the GUI framework
