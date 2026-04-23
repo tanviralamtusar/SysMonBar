@@ -11,6 +11,19 @@ public partial class App : Application
 
     protected override void OnStartup(StartupEventArgs e)
     {
+        this.DispatcherUnhandledException += (s, ev) => 
+        {
+            File.WriteAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "crash_log.txt"), ev.Exception.ToString());
+            ev.Handled = true;
+            Shutdown();
+        };
+
+        AppDomain.CurrentDomain.UnhandledException += (s, ev) =>
+        {
+            if (ev.ExceptionObject is Exception ex)
+                File.WriteAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "crash_log_domain.txt"), ex.ToString());
+        };
+
         base.OnStartup(e);
         SetupTrayIcon();
     }

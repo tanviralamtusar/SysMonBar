@@ -1,0 +1,13 @@
+=== [Motherboard] Gigabyte B550M DS3H ===
+=== [Cpu] AMD Ryzen 5 5600G with Radeon Graphics ===
+  Power          | Package                        | 0
+  Power          | Core #1 (SMU)                  | 0
+  Power          | Core #2 (SMU)                  | 0
+  Power          | Core #3 (SMU)                  | 0
+  Power          | Core #4 (SMU)                  | 0
+  Power          | Core #5 (SMU)                  | 0
+  Power          | Core #6 (SMU)                  | 0
+  Temperature    | Core (Tctl/Tdie)               | 0
+=== [Memory] Virtual Memory ===
+=== [Memory] Total Memory ===
+=== [GpuAmd] AMD Radeon(TM) Graphics ===
