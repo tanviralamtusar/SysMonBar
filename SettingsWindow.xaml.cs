@@ -15,6 +15,7 @@ namespace SysMonBar
         public string RamUnit { get; set; } = "GB";
         public string NetUnit { get; set; } = "kbps";
         public bool RunOnStartup { get; set; } = false;
+        public string DisplayMode { get; set; } = "Graph";
     }
 
     public partial class SettingsWindow : Window

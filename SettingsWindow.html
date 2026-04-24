@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>System Settings</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <style>
+        .material-symbols-outlined {
+            font-family: 'Material Symbols Outlined';
+            font-weight: normal;
+            font-style: normal;
+            font-size: 24px;
+            line-height: 1;
+            letter-spacing: normal;
+            text-transform: none;
+            display: inline-block;
+            white-space: nowrap;
+            word-wrap: normal;
+            direction: ltr;
+            -webkit-font-feature-settings: 'liga';
+            -webkit-font-smoothing: antialiased;
+            user-select: none;
+        }
+        .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* Ensure switches animate smoothly */
+        .switch-track { transition: background-color 300ms; }
+        .switch-thumb { transition: transform 300ms; }
+    </style>
+    <script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-primary-fixed-variant": "#00458f",
+                      "inverse-primary": "#abc7ff",
+                      "graphite-surface-b": "#262629",
+                      "tertiary": "#9b3f00",
+                      "on-surface": "#181c23",
+                      "utility-dark-gray": "#424245",
+                      "primary-fixed": "#d7e2ff",
+                      "graphite-surface-c": "#28282b",
+                      "surface-dim": "#d8d9e3",
+                      "surface-container": "#ecedf7",
+                      "inverse-on-surface": "#eff0fa",
+                      "on-background": "#181c23",
+                      "mid-border-gray": "#86868b",
+                      "absolute-black": "#000000",
+                      "secondary-fixed": "#e4e2e4",
+                      "on-tertiary": "#ffffff",
+                      "surface-container-highest": "#e0e2ec",
+                      "soft-border-gray": "#d2d2d7",
+                      "on-secondary": "#ffffff",
+                      "tertiary-fixed-dim": "#ffb693",
+                      "on-primary-container": "#fcfbff",
+                      "on-primary-fixed": "#001b3f",
+                      "secondary-fixed-dim": "#c8c6c8",
+                      "surface-container-lowest": "#ffffff",
+                      "pure-white": "#ffffff",
+                      "surface-container-high": "#e6e8f2",
+                      "secondary-container": "#e2dfe1",
+                      "error": "#ba1a1a",
+                      "error-container": "#ffdad6",
+                      "primary-fixed-dim": "#abc7ff",
+                      "primary": "#0059b5",
+                      "on-surface-variant": "#414753",
+                      "surface-container-low": "#f2f3fd",
+                      "on-primary": "#ffffff",
+                      "on-error": "#ffffff",
+                      "graphite-surface-d": "#2a2a2c",
+                      "surface-tint": "#005cbb",
+                      "background": "#f9f9ff",
+                      "secondary": "#5f5e60",
+                      "tertiary-container": "#c25100",
+                      "secondary-neutral-gray": "#6e6e73",
+                      "on-error-container": "#93000a",
+                      "on-secondary-fixed-variant": "#474649",
+                      "tertiary-fixed": "#ffdbcb",
+                      "on-tertiary-fixed": "#341000",
+                      "surface": "#f9f9ff",
+                      "pale-apple-gray": "#f5f5f7",
+                      "graphite-surface-a": "#272729",
+                      "outline": "#717785",
+                      "on-tertiary-fixed-variant": "#7a3000",
+                      "primary-container": "#0071e3",
+                      "outline-variant": "#c1c6d6",
+                      "on-secondary-fixed": "#1b1b1d",
+                      "surface-bright": "#f9f9ff",
+                      "surface-variant": "#e0e2ec",
+                      "body-link-blue": "#0066cc",
+                      "inverse-surface": "#2d3038",
+                      "high-luminance-blue": "#2997ff",
+                      "on-tertiary-container": "#fffaf9",
+                      "on-secondary-container": "#636264"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "utility-sm": "14px",
+                      "utility-lg": "20px",
+                      "section-stack": "80px",
+                      "gutter": "24px",
+                      "base": "8px",
+                      "utility-micro": "4px",
+                      "utility-md": "17px"
+              },
+              "fontFamily": {
+                      "hero-display-l": ["Inter"],
+                      "section-display": ["Inter"],
+                      "control-label": ["Inter"],
+                      "body-primary": ["Inter"],
+                      "body-emphasis": ["Inter"],
+                      "utility-heading": ["Inter"],
+                      "card-title": ["Inter"],
+                      "promo-display": ["Inter"],
+                      "micro-ui": ["Inter"],
+                      "hero-display-xl": ["Inter"],
+                      "product-heading": ["Inter"],
+                      "legal-meta": ["Inter"]
+              }
+            }
+          }
+        }
+    </script>
+</head>
+<body class="bg-pale-apple-gray text-on-surface min-h-screen font-body-primary antialiased pb-24 md:pb-0 no-scrollbar">
+<header class="bg-white/80 backdrop-blur-xl docked full-width top-0 sticky z-50 border-b border-zinc-200 flat no shadows flex items-center justify-between px-4 h-14 w-full">
+    <div class="flex items-center gap-3">
+        <button id="btn-back" class="flex items-center justify-center hover:bg-zinc-100 transition-colors active:opacity-70 transition-opacity rounded-full p-1 -ml-1">
+            <span class="material-symbols-outlined text-blue-600">arrow_back</span>
+        </button>
+        <h1 class="font-['Inter'] font-semibold text-lg tracking-tight text-zinc-900 tracking-tighter">Settings</h1>
+    </div>
+</header>
+
+<main class="max-w-[700px] mx-auto px-4 sm:px-6 pt-6 pb-12">
+    <!-- Modules Section -->
+    <div class="mb-8">
+        <h2 class="font-micro-ui text-[12px] text-secondary-neutral-gray uppercase tracking-wider mb-2 ml-4">Modules</h2>
+        <div class="bg-pure-white rounded-xl overflow-hidden shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+            
+            <!-- CPU -->
+            <div class="p-utility-md border-b border-soft-border-gray">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center gap-utility-sm">
+                        <div class="w-[30px] h-[30px] rounded-[7px] bg-primary-container text-pure-white flex items-center justify-center">
+                            <span class="material-symbols-outlined text-[20px]">memory</span>
+                        </div>
+                        <span class="font-body-primary text-[17px] text-absolute-black">CPU</span>
+                    </div>
+                    <div id="switch-cpu" class="w-[51px] h-[31px] rounded-full bg-primary-container p-[2px] cursor-pointer switch-track">
+                        <div class="w-[27px] h-[27px] bg-pure-white rounded-full shadow-[0_3px_8px_rgba(0,0,0,0.15)] translate-x-[20px] switch-thumb"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RAM -->
+            <div class="p-utility-md border-b border-soft-border-gray">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center gap-utility-sm">
+                        <div class="w-[30px] h-[30px] rounded-[7px] bg-surface-tint text-pure-white flex items-center justify-center">
+                            <span class="material-symbols-outlined text-[20px]">dns</span>
+                        </div>
+                        <span class="font-body-primary text-[17px] text-absolute-black">RAM</span>
+                    </div>
+                    <div id="switch-ram" class="w-[51px] h-[31px] rounded-full bg-primary-container p-[2px] cursor-pointer switch-track">
+                        <div class="w-[27px] h-[27px] bg-pure-white rounded-full shadow-[0_3px_8px_rgba(0,0,0,0.15)] translate-x-[20px] switch-thumb"></div>
+                    </div>
+                </div>
+                <div class="ml-[44px]">
+                    <div class="flex bg-surface-variant p-0.5 rounded-[9px] w-full max-w-[260px]">
+                        <button id="btn-ram-gb" class="flex-1 bg-pure-white text-absolute-black font-control-label text-[14px] py-1 rounded-[7px] shadow-[0_1px_3px_rgba(0,0,0,0.1),0_1px_2px_rgba(0,0,0,0.06)]">GB</button>
+                        <button id="btn-ram-mb" class="flex-1 text-secondary-neutral-gray font-control-label text-[14px] py-1 rounded-[7px]">MB</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- GPU -->
+            <div class="p-utility-md border-b border-soft-border-gray">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center gap-utility-sm">
+                        <div class="w-[30px] h-[30px] rounded-[7px] bg-tertiary-container text-pure-white flex items-center justify-center">
+                            <span class="material-symbols-outlined text-[20px]">developer_board</span>
+                        </div>
+                        <span class="font-body-primary text-[17px] text-absolute-black">GPU</span>
+                    </div>
+                    <div id="switch-gpu" class="w-[51px] h-[31px] rounded-full bg-primary-container p-[2px] cursor-pointer switch-track">
+                        <div class="w-[27px] h-[27px] bg-pure-white rounded-full shadow-[0_3px_8px_rgba(0,0,0,0.15)] translate-x-[20px] switch-thumb"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Network -->
+            <div class="p-utility-md border-b border-soft-border-gray">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center gap-utility-sm">
+                        <div class="w-[30px] h-[30px] rounded-[7px] bg-high-luminance-blue text-pure-white flex items-center justify-center">
+                            <span class="material-symbols-outlined text-[20px]">wifi</span>
+                        </div>
+                        <span class="font-body-primary text-[17px] text-absolute-black">Network</span>
+                    </div>
+                    <div id="switch-net" class="w-[51px] h-[31px] rounded-full bg-primary-container p-[2px] cursor-pointer switch-track">
+                        <div class="w-[27px] h-[27px] bg-pure-white rounded-full shadow-[0_3px_8px_rgba(0,0,0,0.15)] translate-x-[20px] switch-thumb"></div>
+                    </div>
+                </div>
+                <div class="ml-[44px]">
+                    <div class="flex bg-surface-variant p-0.5 rounded-[9px] w-full max-w-[260px]">
+                        <button id="btn-net-kbps" class="flex-1 bg-pure-white text-absolute-black font-control-label text-[14px] py-1 rounded-[7px] shadow-[0_1px_3px_rgba(0,0,0,0.1),0_1px_2px_rgba(0,0,0,0.06)]">kbps</button>
+                        <button id="btn-net-mbps" class="flex-1 text-secondary-neutral-gray font-control-label text-[14px] py-1 rounded-[7px]">mbps</button>
+                        <button id="btn-net-kbs" class="flex-1 text-secondary-neutral-gray font-control-label text-[14px] py-1 rounded-[7px]">KB/s</button>
+                        <button id="btn-net-mbs" class="flex-1 text-secondary-neutral-gray font-control-label text-[14px] py-1 rounded-[7px]">MB/s</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Power -->
+            <div class="p-utility-md border-b border-soft-border-gray">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center gap-utility-sm">
+                        <div class="w-[30px] h-[30px] rounded-[7px] bg-tertiary text-pure-white flex items-center justify-center">
+                            <span class="material-symbols-outlined text-[20px]">battery_charging_full</span>
+                        </div>
+                        <span class="font-body-primary text-[17px] text-absolute-black">Power</span>
+                    </div>
+                    <div id="switch-power" class="w-[51px] h-[31px] rounded-full bg-primary-container p-[2px] cursor-pointer switch-track">
+                        <div class="w-[27px] h-[27px] bg-pure-white rounded-full shadow-[0_3px_8px_rgba(0,0,0,0.15)] translate-x-[20px] switch-thumb"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Temperature -->
+            <div class="p-utility-md">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center gap-utility-sm">
+                        <div class="w-[30px] h-[30px] rounded-[7px] bg-error text-pure-white flex items-center justify-center">
+                            <span class="material-symbols-outlined text-[20px]">thermostat</span>
+                        </div>
+                        <span class="font-body-primary text-[17px] text-absolute-black">Temperature</span>
+                    </div>
+                    <div id="switch-temp" class="w-[51px] h-[31px] rounded-full bg-primary-container p-[2px] cursor-pointer switch-track">
+                        <div class="w-[27px] h-[27px] bg-pure-white rounded-full shadow-[0_3px_8px_rgba(0,0,0,0.15)] translate-x-[20px] switch-thumb"></div>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    <!-- General Section -->
+    <div class="mb-10">
+        <h2 class="font-micro-ui text-[12px] text-secondary-neutral-gray uppercase tracking-wider mb-2 ml-4">General</h2>
+        <div class="bg-pure-white rounded-xl overflow-hidden shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+            <!-- Run on Startup -->
+            <div class="p-utility-md border-b border-soft-border-gray flex items-center justify-between">
+                <div class="flex items-center gap-utility-sm">
+                    <div class="w-[30px] h-[30px] rounded-[7px] bg-utility-dark-gray text-pure-white flex items-center justify-center">
+                        <span class="material-symbols-outlined text-[20px]">rocket_launch</span>
+                    </div>
+                    <span class="font-body-primary text-[17px] text-absolute-black">Run on Startup</span>
+                </div>
+                <div id="switch-startup" class="w-[51px] h-[31px] rounded-full bg-secondary-fixed-dim p-[2px] cursor-pointer switch-track">
+                    <div class="w-[27px] h-[27px] bg-pure-white rounded-full shadow-[0_3px_8px_rgba(0,0,0,0.15)] switch-thumb"></div>
+                </div>
+            </div>
+
+            <!-- Display Mode -->
+            <div class="p-utility-md flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div class="flex items-center gap-utility-sm">
+                    <div class="w-[30px] h-[30px] rounded-[7px] bg-tertiary-container text-pure-white flex items-center justify-center">
+                        <span class="material-symbols-outlined text-[20px]">dashboard</span>
+                    </div>
+                    <span class="font-body-primary text-[17px] text-absolute-black">Display Mode</span>
+                </div>
+                <div>
+                    <div class="flex bg-surface-variant p-0.5 rounded-[9px] w-full sm:w-[200px]">
+                        <button id="btn-disp-graph" class="flex-1 bg-pure-white text-absolute-black font-control-label text-[14px] py-1 rounded-[7px] shadow-[0_1px_3px_rgba(0,0,0,0.1),0_1px_2px_rgba(0,0,0,0.06)]">Graph</button>
+                        <button id="btn-disp-bar" class="flex-1 text-secondary-neutral-gray font-control-label text-[14px] py-1 rounded-[7px]">Bar</button>
+                        <button id="btn-disp-text" class="flex-1 text-secondary-neutral-gray font-control-label text-[14px] py-1 rounded-[7px]">Text</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button id="btn-save" class="w-full bg-primary-container text-pure-white font-body-emphasis text-[17px] py-[14px] rounded-xl shadow-[0_2px_10px_rgba(0,113,227,0.2)] active:scale-[0.98] transition-transform">
+        Save and Apply
+    </button>
+</main>
+
+<script>
+    const settings = {
+        ShowCpu: true,
+        ShowRam: true,
+        ShowGpu: true,
+        ShowNet: true,
+        ShowPower: true,
+        ShowTemp: true,
+        RunOnStartup: false,
+        RamUnit: "GB",
+        NetUnit: "kbps",
+        DisplayMode: "Graph"
+    };
+
+    function updateSwitchUI(id, active) {
+        const sw = document.getElementById(id);
+        if (!sw) return;
+        const circle = sw.firstElementChild;
+        if (active) {
+            sw.classList.remove('bg-secondary-fixed-dim');
+            sw.classList.add('bg-primary-container');
+            circle.classList.add('translate-x-[20px]');
+        } else {
+            sw.classList.remove('bg-primary-container');
+            sw.classList.add('bg-secondary-fixed-dim');
+            circle.classList.remove('translate-x-[20px]');
+        }
+    }
+
+    function toggleSetting(key, id) {
+        settings[key] = !settings[key];
+        updateSwitchUI(id, settings[key]);
+    }
+    
+    function setSegment(groupId, value, btnIds) {
+        settings[groupId] = value;
+        for (const [btnId, btnVal] of Object.entries(btnIds)) {
+            const btn = document.getElementById(btnId);
+            if (!btn) continue;
+            if (btnVal === value) {
+                btn.classList.add('bg-pure-white', 'text-absolute-black', 'shadow-[0_1px_3px_rgba(0,0,0,0.1),0_1px_2px_rgba(0,0,0,0.06)]');
+                btn.classList.remove('text-secondary-neutral-gray');
+            } else {
+                btn.classList.remove('bg-pure-white', 'text-absolute-black', 'shadow-[0_1px_3px_rgba(0,0,0,0.1),0_1px_2px_rgba(0,0,0,0.06)]');
+                btn.classList.add('text-secondary-neutral-gray');
+            }
+        }
+    }
+
+    const ramBtns = {
+        'btn-ram-gb': 'GB',
+        'btn-ram-mb': 'MB'
+    };
+    
+    const netBtns = {
+        'btn-net-kbps': 'kbps',
+        'btn-net-mbps': 'mbps',
+        'btn-net-kbs': 'KB/s',
+        'btn-net-mbs': 'MB/s'
+    };
+
+    const dispBtns = {
+        'btn-disp-graph': 'Graph',
+        'btn-disp-bar': 'Bar',
+        'btn-disp-text': 'Text'
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('switch-cpu')?.addEventListener('click', () => toggleSetting('ShowCpu', 'switch-cpu'));
+        document.getElementById('switch-ram')?.addEventListener('click', () => toggleSetting('ShowRam', 'switch-ram'));
+        document.getElementById('switch-gpu')?.addEventListener('click', () => toggleSetting('ShowGpu', 'switch-gpu'));
+        document.getElementById('switch-net')?.addEventListener('click', () => toggleSetting('ShowNet', 'switch-net'));
+        document.getElementById('switch-power')?.addEventListener('click', () => toggleSetting('ShowPower', 'switch-power'));
+        document.getElementById('switch-temp')?.addEventListener('click', () => toggleSetting('ShowTemp', 'switch-temp'));
+        document.getElementById('switch-startup')?.addEventListener('click', () => toggleSetting('RunOnStartup', 'switch-startup'));
+
+        for (const [btnId, val] of Object.entries(ramBtns)) {
+            document.getElementById(btnId)?.addEventListener('click', () => setSegment('RamUnit', val, ramBtns));
+        }
+        
+        for (const [btnId, val] of Object.entries(netBtns)) {
+            document.getElementById(btnId)?.addEventListener('click', () => setSegment('NetUnit', val, netBtns));
+        }
+
+        for (const [btnId, val] of Object.entries(dispBtns)) {
+            document.getElementById(btnId)?.addEventListener('click', () => setSegment('DisplayMode', val, dispBtns));
+        }
+
+        document.getElementById('btn-save')?.addEventListener('click', () => {
+            if (window.chrome && window.chrome.webview) {
+                window.chrome.webview.postMessage(JSON.stringify({ action: "SAVE", payload: settings }));
+            }
+        });
+
+        document.getElementById('btn-back')?.addEventListener('click', () => {
+            if (window.chrome && window.chrome.webview) {
+                window.chrome.webview.postMessage(JSON.stringify({ action: "CANCEL" }));
+            }
+        });
+    });
+
+    // Called from C#
+    function loadSettings(json) {
+        try {
+            const data = JSON.parse(json);
+            Object.assign(settings, data);
+            updateSwitchUI('switch-cpu', settings.ShowCpu);
+            updateSwitchUI('switch-ram', settings.ShowRam);
+            updateSwitchUI('switch-gpu', settings.ShowGpu);
+            updateSwitchUI('switch-net', settings.ShowNet);
+            updateSwitchUI('switch-power', settings.ShowPower);
+            updateSwitchUI('switch-temp', settings.ShowTemp);
+            updateSwitchUI('switch-startup', settings.RunOnStartup);
+            
+            setSegment('RamUnit', settings.RamUnit, ramBtns);
+            setSegment('NetUnit', settings.NetUnit, netBtns);
+            setSegment('DisplayMode', settings.DisplayMode || 'Graph', dispBtns);
+        } catch (e) {
+            console.error("Failed to parse settings", e);
+        }
+    }
+</script>
+</body>
+</html>
