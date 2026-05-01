@@ -62,7 +62,6 @@ namespace SysMonBar
         
         // Background WMI fields
         private float _lastCpuTemp;
-        private float _lastGpuTemp;
         private bool _isDisposed;
         private Thread? _wmiThread;
 
@@ -128,14 +127,15 @@ namespace SysMonBar
                         if (float.TryParse(obj["CurrentTemperature"]?.ToString(), out float tempK))
                         {
                             float tempC = (tempK - 2732f) / 10f;
-                            if (tempC > maxTemp && tempC < 150)
+                            // Only accept 'sane' temperatures. Values like 17C are often static dummy values in BIOS.
+                            if (tempC > maxTemp && tempC > 25 && tempC < 150)
                                 maxTemp = tempC;
                         }
                     }
-                    if (maxTemp > 0)
+                    if (maxTemp > 25)
                     {
                         _lastCpuTemp = maxTemp;
-                        _lastGpuTemp = maxTemp;
+                        // Don't set _lastGpuTemp here; ACPI zones are almost never GPU-related.
                     }
                 }
                 catch { }
@@ -254,6 +254,11 @@ namespace SysMonBar
                                         stats.CpuTemp = value;
                                         cpuTempPriority = priority;
                                     }
+                                    else if (cpuTempPriority == 0 && (name.Contains("CPU") || name.Contains("Temperature")) && value > 0)
+                                    {
+                                        // Absolute last resort for LHM sensors
+                                        stats.CpuTemp = value;
+                                    }
                                 }
                                 else if (sensor.SensorType == SensorType.Power)
                                 {
@@ -279,6 +284,7 @@ namespace SysMonBar
                                     int priority = 0;
                                     if (name == "GPU Core" || name == "Core") priority = 10;
                                     else if (name == "GPU Hot Spot" || name == "Hot Spot") priority = 5;
+                                    else if (name.Contains("Temperature") || name.Contains("GPU Value")) priority = 2; // Broad fallback
 
                                     if (priority > gpuTempPriority && value > 0 && value < 150)
                                     {
@@ -402,8 +408,7 @@ namespace SysMonBar
 
             // Temperature Fallback
             if (stats.CpuTemp <= 0) stats.CpuTemp = _lastCpuTemp;
-            if (stats.GpuTemp <= 0) stats.GpuTemp = _lastGpuTemp;
-
+            
             // Estimation Fallback (Last resort)
             if (stats.PowerWatts < 1)
                 stats.PowerWatts = 15f + (stats.CpuUsage / 100f) * 50f + (stats.GpuUsage / 100f) * 30f;
