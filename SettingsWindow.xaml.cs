@@ -23,7 +23,7 @@ namespace SysMonBar
         public string TempColor { get; set; } = "#e74c3c";
 
         public string RamUnit { get; set; } = "GB";
-        public string NetUnit { get; set; } = "kbps";
+        public string NetUnit { get; set; } = "bit/s";
         public bool RunOnStartup { get; set; } = false;
         public string DisplayMode { get; set; } = "Graph";
         public double GraphWidth { get; set; } = 36;
@@ -128,10 +128,8 @@ namespace SysMonBar
             rbRamGB.IsChecked = Settings.RamUnit == "GB";
             rbRamMB.IsChecked = Settings.RamUnit == "MB";
 
-            rbNetKbps.IsChecked = Settings.NetUnit == "kbps";
-            rbNetMbps.IsChecked = Settings.NetUnit == "mbps" || Settings.NetUnit == "Mbps";
-            rbNetKBs.IsChecked = Settings.NetUnit == "KB/s";
-            rbNetMBs.IsChecked = Settings.NetUnit == "MB/s";
+            rbNetBits.IsChecked = Settings.NetUnit == "bit/s";
+            rbNetBytes.IsChecked = Settings.NetUnit == "byte/s";
 
             rbDispGraph.IsChecked = Settings.DisplayMode == "Graph";
             rbDispBar.IsChecked = Settings.DisplayMode == "Bar";
@@ -161,10 +159,8 @@ namespace SysMonBar
             if (rbRamGB.IsChecked == true) Settings.RamUnit = "GB";
             else if (rbRamMB.IsChecked == true) Settings.RamUnit = "MB";
 
-            if (rbNetKbps.IsChecked == true) Settings.NetUnit = "kbps";
-            else if (rbNetMbps.IsChecked == true) Settings.NetUnit = "Mbps";
-            else if (rbNetKBs.IsChecked == true) Settings.NetUnit = "KB/s";
-            else if (rbNetMBs.IsChecked == true) Settings.NetUnit = "MB/s";
+            if (rbNetBits.IsChecked == true) Settings.NetUnit = "bit/s";
+            else if (rbNetBytes.IsChecked == true) Settings.NetUnit = "byte/s";
 
             if (rbDispGraph.IsChecked == true) Settings.DisplayMode = "Graph";
             else if (rbDispBar.IsChecked == true) Settings.DisplayMode = "Bar";

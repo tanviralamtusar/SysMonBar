@@ -209,24 +209,40 @@ namespace SysMonBar
 
         private string FormatNet(double bytesPerSec, string unit)
         {
-            return unit switch
+            if (unit == "byte/s")
             {
-                "mbps" => $"{bytesPerSec * 8 / 1024 / 1024:F2} Mbps",
-                "KB/s" => $"{bytesPerSec / 1024:F1} KB/s",
-                "MB/s" => $"{bytesPerSec / 1024 / 1024:F2} MB/s",
-                _ => $"{bytesPerSec * 8 / 1024:F1} Kbps"
-            };
+                if (bytesPerSec < 1024) return $"{bytesPerSec:F0} B/s";
+                if (bytesPerSec < 1024 * 1024) return $"{bytesPerSec / 1024:F1} KB/s";
+                if (bytesPerSec < 1024 * 1024 * 1024) return $"{bytesPerSec / (1024 * 1024):F2} MB/s";
+                return $"{bytesPerSec / (1024 * 1024 * 1024):F2} GB/s";
+            }
+            else // bit/s
+            {
+                double bitsPerSec = bytesPerSec * 8;
+                if (bitsPerSec < 1000) return $"{bitsPerSec:F0} bps";
+                if (bitsPerSec < 1000000) return $"{bitsPerSec / 1000:F1} Kbps";
+                if (bitsPerSec < 1000000000) return $"{bitsPerSec / 1000000:F2} Mbps";
+                return $"{bitsPerSec / 1000000000:F2} Gbps";
+            }
         }
 
         private string FormatNetShort(double bytesPerSec, string unit)
         {
-            return unit switch
+            if (unit == "byte/s")
             {
-                "mbps" => $"{bytesPerSec * 8 / 1024 / 1024:F0}M",
-                "KB/s" => $"{bytesPerSec / 1024:F0}K",
-                "MB/s" => $"{bytesPerSec / 1024 / 1024:F1}M",
-                _ => $"{bytesPerSec * 8 / 1024:F0}k"
-            };
+                if (bytesPerSec < 1024) return $"{bytesPerSec:F0}B";
+                if (bytesPerSec < 1024 * 1024) return $"{bytesPerSec / 1024:F0}K";
+                if (bytesPerSec < 1024 * 1024 * 1024) return $"{bytesPerSec / (1024 * 1024):F1}M";
+                return $"{bytesPerSec / (1024 * 1024 * 1024):F1}G";
+            }
+            else // bit/s
+            {
+                double bitsPerSec = bytesPerSec * 8;
+                if (bitsPerSec < 1000) return $"{bitsPerSec:F0}b";
+                if (bitsPerSec < 1000000) return $"{bitsPerSec / 1000:F0}k";
+                if (bitsPerSec < 1000000000) return $"{bitsPerSec / 1000000:F0}M";
+                return $"{bitsPerSec / 1000000000:F1}G";
+            }
         }
 
         public void OpenSettings()
