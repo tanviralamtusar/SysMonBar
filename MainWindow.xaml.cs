@@ -5,10 +5,14 @@ using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Threading;
+using System.Runtime.Versioning;
+
 
 namespace SysMonBar
 {
+    [SupportedOSPlatform("windows")]
     public partial class MainWindow : Window
+
     {
         private readonly HardwareMonitor _monitor;
         private readonly DispatcherTimer _updateTimer;

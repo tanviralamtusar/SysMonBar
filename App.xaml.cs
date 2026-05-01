@@ -2,10 +2,14 @@ using System.Drawing;
 using System.IO;
 using System.Windows;
 using Application = System.Windows.Application;
+using System.Runtime.Versioning;
+
 
 namespace SysMonBar;
 
+[SupportedOSPlatform("windows")]
 public partial class App : Application
+
 {
     private System.Windows.Forms.NotifyIcon? _trayIcon;
 
