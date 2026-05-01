@@ -12,6 +12,7 @@ using ColorConverter = System.Windows.Media.ColorConverter;
 using Point = System.Windows.Point;
 using System.Runtime.Versioning;
 using System.Globalization;
+using System.Windows.Threading;
 
 
 namespace SysMonBar
@@ -126,11 +127,17 @@ namespace SysMonBar
     {
         private double _currentKwh;
         private double _currentAvgWatts;
+        private readonly DispatcherTimer _refreshTimer;
 
         public AnalyticsWindow()
         {
             InitializeComponent();
             AnalyticsService.EnsureDb();
+
+            _refreshTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(60) };
+            _refreshTimer.Tick += (s, e) => LoadData(GetHours());
+            _refreshTimer.Start();
+
             // LoadData(24) will be called after Window_Loaded sets the rate
         }
 
@@ -293,6 +300,11 @@ namespace SysMonBar
             DrawMultiLine(UsageCanvas, data.Select(d => d.cpuUsage).ToList(), (Color)ColorConverter.ConvertFromString("#3498db"), data.Select(d => d.gpuUsage).ToList(), (Color)ColorConverter.ConvertFromString("#9b59b6"), "%");
             DrawLine(RamCanvas, data.Select(d => d.ramGb).ToList(), (Color)ColorConverter.ConvertFromString("#1abc9c"), "GB");
             DrawLine(NetCanvas, data.Select(d => d.net / 1024.0).ToList(), (Color)ColorConverter.ConvertFromString("#e67e22"), "KB/s");
+        }
+        protected override void OnClosed(EventArgs e)
+        {
+            _refreshTimer.Stop();
+            base.OnClosed(e);
         }
     }
 }
