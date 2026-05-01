@@ -10,6 +10,8 @@ using Microsoft.EntityFrameworkCore;
 using Color = System.Windows.Media.Color;
 using ColorConverter = System.Windows.Media.ColorConverter;
 using Point = System.Windows.Point;
+using System.Runtime.Versioning;
+
 
 namespace SysMonBar
 {
@@ -118,7 +120,9 @@ namespace SysMonBar
     }
 
     // ── Analytics Window ──
+    [SupportedOSPlatform("windows")]
     public partial class AnalyticsWindow : Window
+
     {
         public AnalyticsWindow()
         {

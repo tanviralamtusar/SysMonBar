@@ -5,6 +5,8 @@ using System.Linq;
 using System.Management;
 using System.Threading;
 using LibreHardwareMonitor.Hardware;
+using System.Runtime.Versioning;
+
 
 namespace SysMonBar
 {
@@ -15,6 +17,8 @@ namespace SysMonBar
         public float RamTotalGb { get; set; }
         public float GpuUsage { get; set; }
         public float PowerWatts { get; set; }
+        public float CpuPower { get; set; }
+        public float GpuPower { get; set; }
         public float CpuTemp { get; set; }
         public float GpuTemp { get; set; }
         public float CombinedTemp => Math.Max(CpuTemp, GpuTemp);
@@ -22,7 +26,9 @@ namespace SysMonBar
         public double NetDown { get; set; }
     }
 
+    [SupportedOSPlatform("windows")]
     public class UpdateVisitor : IVisitor
+
     {
         public void VisitComputer(IComputer computer) => computer.Traverse(this);
 
@@ -38,7 +44,9 @@ namespace SysMonBar
         public void VisitParameter(IParameter parameter) { }
     }
 
+    [SupportedOSPlatform("windows")]
     public class HardwareMonitor : IDisposable
+
     {
         // Legacy counters
         private PerformanceCounter? _cpuCounter;
@@ -54,7 +62,6 @@ namespace SysMonBar
         
         // Background WMI fields
         private float _lastCpuTemp;
-        private float _lastGpuTemp;
         private bool _isDisposed;
         private Thread? _wmiThread;
 
@@ -120,14 +127,15 @@ namespace SysMonBar
                         if (float.TryParse(obj["CurrentTemperature"]?.ToString(), out float tempK))
                         {
                             float tempC = (tempK - 2732f) / 10f;
-                            if (tempC > maxTemp && tempC < 150)
+                            // Only accept 'sane' temperatures. Values like 17C are often static dummy values in BIOS.
+                            if (tempC > maxTemp && tempC > 25 && tempC < 150)
                                 maxTemp = tempC;
                         }
                     }
-                    if (maxTemp > 0)
+                    if (maxTemp > 25)
                     {
                         _lastCpuTemp = maxTemp;
-                        _lastGpuTemp = maxTemp;
+                        // Don't set _lastGpuTemp here; ACPI zones are almost never GPU-related.
                     }
                 }
                 catch { }
@@ -201,41 +209,138 @@ namespace SysMonBar
             UpdateDynamicCounters();
             var stats = new HardwareStats { RamTotalGb = _totalRamGb };
 
-            bool lhmSuccess = false;
+
             if (_computer != null)
             {
                 try
                 {
                     _computer.Accept(new UpdateVisitor());
 
+                    // Track sensor priorities: higher = better/more reliable source
+                    int cpuTempPriority = 0;
+                    int gpuTempPriority = 0;
+                    int cpuPowerPriority = 0;
+                    int gpuPowerPriority = 0;
+                    float ramAvailableGb = 0;
+
                     void ProcessHardware(IHardware hw)
                     {
                         foreach (ISensor sensor in hw.Sensors)
                         {
                             if (sensor.Value == null) continue;
+                            string name = sensor.Name;
+                            float value = sensor.Value.Value;
 
                             if (hw.HardwareType == HardwareType.Cpu)
                             {
-                                if (sensor.SensorType == SensorType.Load && sensor.Name == "CPU Total") stats.CpuUsage = sensor.Value.Value;
-                                else if (sensor.SensorType == SensorType.Temperature && sensor.Name.Contains("Core Average")) stats.CpuTemp = sensor.Value.Value;
-                                else if (sensor.SensorType == SensorType.Temperature && sensor.Name.Contains("Package")) stats.CpuTemp = sensor.Value.Value;
-                                else if (sensor.SensorType == SensorType.Power && sensor.Name.Contains("Package")) stats.PowerWatts += sensor.Value.Value;
+                                if (sensor.SensorType == SensorType.Load && name == "CPU Total")
+                                {
+                                    stats.CpuUsage = value;
+                                }
+                                else if (sensor.SensorType == SensorType.Temperature)
+                                {
+                                    int priority = 0;
+                                    if (name == "Core Average" || name == "CCDs Average (Tdie)") priority = 10;
+                                    else if (name == "CPU Package" || name == "Package") priority = 9;
+                                    else if (name == "Core (Tctl/Tdie)") priority = 8;
+                                    else if (name == "Core (Tdie)") priority = 7;
+                                    else if (name == "Core (Tctl)") priority = 6;
+                                    else if (name == "CPU Cores") priority = 5;
+                                    else if (name == "Core Max" || name == "CCDs Max (Tdie)") priority = 4;
+                                    else if (name.StartsWith("Core #") || name.StartsWith("P-Core") || name.StartsWith("E-Core")) priority = 3;
+
+                                    if (priority > cpuTempPriority && value > 0 && value < 150)
+                                    {
+                                        stats.CpuTemp = value;
+                                        cpuTempPriority = priority;
+                                    }
+                                    else if (cpuTempPriority == 0 && (name.Contains("CPU") || name.Contains("Temperature")) && value > 0)
+                                    {
+                                        // Absolute last resort for LHM sensors
+                                        stats.CpuTemp = value;
+                                    }
+                                }
+                                else if (sensor.SensorType == SensorType.Power)
+                                {
+                                    int priority = 0;
+                                    if (name == "CPU Package" || name == "Package") priority = 10;
+                                    else if (name == "CPU Cores") priority = 5;
+
+                                    if (priority > cpuPowerPriority)
+                                    {
+                                        stats.CpuPower = value;
+                                        cpuPowerPriority = priority;
+                                    }
+                                }
                             }
                             else if (hw.HardwareType == HardwareType.GpuNvidia || hw.HardwareType == HardwareType.GpuAmd || hw.HardwareType == HardwareType.GpuIntel)
                             {
-                                if (sensor.SensorType == SensorType.Load && sensor.Name.Contains("Core")) stats.GpuUsage = sensor.Value.Value;
-                                else if (sensor.SensorType == SensorType.Temperature && sensor.Name.Contains("Core")) stats.GpuTemp = sensor.Value.Value;
-                                else if (sensor.SensorType == SensorType.Power && sensor.Name.Contains("GPU Package")) stats.PowerWatts += sensor.Value.Value;
+                                if (sensor.SensorType == SensorType.Load && (name.Contains("Core") || name.Contains("GPU Value")))
+                                {
+                                    stats.GpuUsage = value;
+                                }
+                                else if (sensor.SensorType == SensorType.Temperature)
+                                {
+                                    int priority = 0;
+                                    if (name == "GPU Core" || name == "Core") priority = 10;
+                                    else if (name == "GPU Hot Spot" || name == "Hot Spot") priority = 5;
+                                    else if (name.Contains("Temperature") || name.Contains("GPU Value")) priority = 2; // Broad fallback
+
+                                    if (priority > gpuTempPriority && value > 0 && value < 150)
+                                    {
+                                        stats.GpuTemp = value;
+                                        gpuTempPriority = priority;
+                                    }
+                                }
+                                else if (sensor.SensorType == SensorType.Power)
+                                {
+                                    int priority = 0;
+                                    if (name == "GPU Package" || name == "Board Power") priority = 10;
+                                    else if (name == "GPU Power" || name == "Total Power") priority = 8;
+                                    else if (name == "GPU Core" || name == "Power Draw") priority = 5;
+
+                                    if (priority > gpuPowerPriority)
+                                    {
+                                        stats.GpuPower = value;
+                                        gpuPowerPriority = priority;
+                                    }
+                                }
                             }
                             else if (hw.HardwareType == HardwareType.Memory)
                             {
-                                if (sensor.SensorType == SensorType.Data && sensor.Name == "Memory Used") stats.RamUsedGb = sensor.Value.Value;
-                                else if (sensor.SensorType == SensorType.Data && sensor.Name == "Memory") stats.RamTotalGb = sensor.Value.Value + (sensor.Name.Contains("Available") ? sensor.Value.Value : 0);
+                                if (sensor.SensorType == SensorType.Data)
+                                {
+                                    if (name == "Memory Used") stats.RamUsedGb = value;
+                                    else if (name == "Memory Available") ramAvailableGb = value;
+                                }
                             }
                             else if (hw.HardwareType == HardwareType.Network)
                             {
-                                if (sensor.SensorType == SensorType.Throughput && sensor.Name.Contains("Upload")) stats.NetUp += sensor.Value.Value;
-                                else if (sensor.SensorType == SensorType.Throughput && sensor.Name.Contains("Download")) stats.NetDown += sensor.Value.Value;
+                                if (sensor.SensorType == SensorType.Throughput)
+                                {
+                                    if (name.Contains("Upload")) stats.NetUp += value;
+                                    else if (name.Contains("Download")) stats.NetDown += value;
+                                }
+                            }
+                            else if (hw.HardwareType == HardwareType.Motherboard)
+                            {
+                                // Fallbacks for systems where CPU doesn't report itself
+                                if (sensor.SensorType == SensorType.Temperature && name.Contains("CPU"))
+                                {
+                                    if (cpuTempPriority < 2)
+                                    {
+                                        stats.CpuTemp = value;
+                                        cpuTempPriority = 2;
+                                    }
+                                }
+                                else if (sensor.SensorType == SensorType.Power && (name.Contains("CPU") || name.Contains("Vcore")))
+                                {
+                                    if (cpuPowerPriority < 2)
+                                    {
+                                        stats.CpuPower = value;
+                                        cpuPowerPriority = 2;
+                                    }
+                                }
                             }
                         }
 
@@ -249,7 +354,13 @@ namespace SysMonBar
                     {
                         ProcessHardware(hardware);
                     }
-                    lhmSuccess = true;
+
+                    if (stats.RamUsedGb > 0 && ramAvailableGb > 0)
+                        stats.RamTotalGb = stats.RamUsedGb + ramAvailableGb;
+                    
+                    stats.PowerWatts = stats.CpuPower + stats.GpuPower;
+
+
                 }
                 catch (Exception ex)
                 {
@@ -297,8 +408,7 @@ namespace SysMonBar
 
             // Temperature Fallback
             if (stats.CpuTemp <= 0) stats.CpuTemp = _lastCpuTemp;
-            if (stats.GpuTemp <= 0) stats.GpuTemp = _lastGpuTemp;
-
+            
             // Estimation Fallback (Last resort)
             if (stats.PowerWatts < 1)
                 stats.PowerWatts = 15f + (stats.CpuUsage / 100f) * 50f + (stats.GpuUsage / 100f) * 30f;

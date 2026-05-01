@@ -3,6 +3,8 @@ using System.IO;
 using System.Text.Json;
 using System.Windows;
 using Microsoft.Win32;
+using System.Runtime.Versioning;
+
 
 namespace SysMonBar
 {
@@ -79,7 +81,9 @@ namespace SysMonBar
         public string Hex { get; set; } = string.Empty;
     }
 
+    [SupportedOSPlatform("windows")]
     public partial class SettingsWindow : Window
+
     {
         public List<ColorOption> AvailableColors { get; } = new List<ColorOption>
         {

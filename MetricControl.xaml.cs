@@ -6,10 +6,14 @@ using System.Windows.Shapes;
 using Brush = System.Windows.Media.Brush;
 using Brushes = System.Windows.Media.Brushes;
 using UserControl = System.Windows.Controls.UserControl;
+using System.Runtime.Versioning;
+
 
 namespace SysMonBar
 {
+    [SupportedOSPlatform("windows")]
     public partial class MetricControl : UserControl
+
     {
         public static readonly DependencyProperty ColorProperty =
             DependencyProperty.Register("Color", typeof(Brush), typeof(MetricControl),
