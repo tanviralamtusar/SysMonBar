@@ -29,6 +29,7 @@ namespace SysMonBar
         public bool RunOnStartup { get; set; } = false;
         public string DisplayMode { get; set; } = "Graph";
         public double GraphWidth { get; set; } = 36;
+        public double ElectricityRate { get; set; } = 8.0;
 
         public bool LockPosition { get; set; } = false;
         public double? WindowLeft { get; set; }
@@ -140,6 +141,7 @@ namespace SysMonBar
             rbDispText.IsChecked = Settings.DisplayMode == "Text";
 
             slGraphWidth.Value = Settings.GraphWidth > 0 ? Settings.GraphWidth : 36;
+            txtElectricityRate.Text = Settings.ElectricityRate.ToString(System.Globalization.CultureInfo.InvariantCulture);
         }
 
         private void SaveSettingsFromUI()
@@ -171,6 +173,11 @@ namespace SysMonBar
             else if (rbDispText.IsChecked == true) Settings.DisplayMode = "Text";
 
             Settings.GraphWidth = slGraphWidth.Value;
+
+            if (double.TryParse(txtElectricityRate.Text, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double rate))
+            {
+                Settings.ElectricityRate = rate;
+            }
         }
 
         private void slGraphWidth_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)

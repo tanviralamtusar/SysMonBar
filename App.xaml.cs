@@ -12,6 +12,10 @@ public partial class App : Application
 
 {
     private System.Windows.Forms.NotifyIcon? _trayIcon;
+    private System.Windows.Threading.DispatcherTimer? _memoryTimer;
+
+    [System.Runtime.InteropServices.DllImport("kernel32.dll")]
+    private static extern bool SetProcessWorkingSetSize(IntPtr proc, int min, int max);
 
     protected override void OnStartup(StartupEventArgs e)
     {
@@ -30,6 +34,40 @@ public partial class App : Application
 
         base.OnStartup(e);
         SetupTrayIcon();
+        StartMemoryOptimization();
+    }
+
+    private void StartMemoryOptimization()
+    {
+        _memoryTimer = new System.Windows.Threading.DispatcherTimer 
+        { 
+            Interval = TimeSpan.FromMinutes(1) 
+        };
+        _memoryTimer.Tick += (s, e) => TrimMemory();
+        _memoryTimer.Start();
+        
+        // Initial trim after startup finishes
+        System.Threading.Tasks.Task.Delay(5000).ContinueWith(_ => 
+        {
+            Dispatcher.Invoke(TrimMemory);
+        });
+    }
+
+    public static void TrimMemory()
+    {
+        try
+        {
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            GC.Collect();
+            
+            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+            {
+                using var proc = System.Diagnostics.Process.GetCurrentProcess();
+                SetProcessWorkingSetSize(proc.Handle, -1, -1);
+            }
+        }
+        catch { }
     }
 
     private MainWindow? GetMainWin() => MainWindow as MainWindow;

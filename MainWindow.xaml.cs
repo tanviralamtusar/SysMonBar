@@ -257,12 +257,14 @@ namespace SysMonBar
                 _settings = dlg.Settings;
                 _settings.Save();
             }
+            App.TrimMemory();
         }
 
         public void OpenAnalytics()
         {
             var dlg = new AnalyticsWindow();
             dlg.ShowDialog();
+            App.TrimMemory();
         }
 
         protected override void OnClosed(EventArgs e)

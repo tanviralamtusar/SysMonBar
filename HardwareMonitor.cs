@@ -64,6 +64,7 @@ namespace SysMonBar
         private float _lastCpuTemp;
         private bool _isDisposed;
         private Thread? _wmiThread;
+        private readonly UpdateVisitor _visitor = new();
 
         public HardwareMonitor()
         {
@@ -95,8 +96,8 @@ namespace SysMonBar
                     IsCpuEnabled = true,
                     IsGpuEnabled = true,
                     IsMemoryEnabled = true,
-                    IsNetworkEnabled = true,
-                    IsMotherboardEnabled = true
+                    IsNetworkEnabled = false, // Use PerformanceCounters instead
+                    IsMotherboardEnabled = false // Very heavy, disabling for 20MB target
                 };
                 _computer.Open();
             }
@@ -140,7 +141,7 @@ namespace SysMonBar
                 }
                 catch { }
 
-                for (int i = 0; i < 20 && !_isDisposed; i++)
+                for (int i = 0; i < 50 && !_isDisposed; i++) // Increased sleep to 5s
                 {
                     Thread.Sleep(100);
                 }
@@ -214,7 +215,7 @@ namespace SysMonBar
             {
                 try
                 {
-                    _computer.Accept(new UpdateVisitor());
+                    _computer.Accept(_visitor);
 
                     // Track sensor priorities: higher = better/more reliable source
                     int cpuTempPriority = 0;

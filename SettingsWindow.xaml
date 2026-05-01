@@ -303,6 +303,16 @@
                             <Slider x:Name="slGraphWidth" Minimum="12" Maximum="150" ValueChanged="slGraphWidth_ValueChanged" 
                                     IsSnapToTickEnabled="True" TickFrequency="1" Margin="-5,0"/>
                         </StackPanel>
+
+                        <Separator/>
+
+                        <!-- Electricity Rate -->
+                        <Grid>
+                            <TextBlock Text="Electricity Rate (BDT/kWh)" Style="{StaticResource PropertyLabel}"/>
+                            <TextBox x:Name="txtElectricityRate" Width="80" HorizontalAlignment="Right"
+                                     Background="#F9FAFB" Foreground="#111827" BorderBrush="#E5E7EB" BorderThickness="1"
+                                     Padding="8,6" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
+                        </Grid>
                     </StackPanel>
                 </Border>
                 </StackPanel>
