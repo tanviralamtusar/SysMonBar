@@ -209,7 +209,7 @@ namespace SysMonBar
             UpdateDynamicCounters();
             var stats = new HardwareStats { RamTotalGb = _totalRamGb };
 
-            bool lhmSuccess = false;
+
             if (_computer != null)
             {
                 try
@@ -354,7 +354,7 @@ namespace SysMonBar
                     
                     stats.PowerWatts = stats.CpuPower + stats.GpuPower;
 
-                    lhmSuccess = true;
+
                 }
                 catch (Exception ex)
                 {
