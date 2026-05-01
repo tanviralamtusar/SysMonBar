@@ -5,7 +5,8 @@
         WindowStartupLocation="CenterScreen"
         Background="#F9FAFB"
         FontFamily="Segoe UI"
-        TextElement.Foreground="#111827">
+        TextElement.Foreground="#111827"
+        Loaded="Window_Loaded">
 
     <Window.Resources>
         <!-- Card Style -->
@@ -164,6 +165,7 @@
                             </Grid.ColumnDefinitions>
                             <TextBlock Text="Rate per kWh:" VerticalAlignment="Center" Foreground="#4B5563" Margin="0,0,12,0"/>
                             <TextBox Grid.Column="1" x:Name="TxtRate" Width="80" Text="8.0" 
+                                     TextChanged="TxtRate_TextChanged"
                                      Background="#F9FAFB" Foreground="#111827" BorderBrush="#E5E7EB" BorderThickness="1"
                                      Padding="8,6" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
                             <TextBlock Grid.Column="2" Text="BDT" VerticalAlignment="Center" Foreground="#6B7280" Margin="8,0,0,0"/>

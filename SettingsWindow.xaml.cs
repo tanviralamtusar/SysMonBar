@@ -29,6 +29,7 @@ namespace SysMonBar
         public bool RunOnStartup { get; set; } = false;
         public string DisplayMode { get; set; } = "Graph";
         public double GraphWidth { get; set; } = 36;
+        public double ElectricityRate { get; set; } = 8.0;
 
         public bool LockPosition { get; set; } = false;
         public double? WindowLeft { get; set; }

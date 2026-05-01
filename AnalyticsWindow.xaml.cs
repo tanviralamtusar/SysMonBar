@@ -11,6 +11,7 @@ using Color = System.Windows.Media.Color;
 using ColorConverter = System.Windows.Media.ColorConverter;
 using Point = System.Windows.Point;
 using System.Runtime.Versioning;
+using System.Globalization;
 
 
 namespace SysMonBar
@@ -122,12 +123,21 @@ namespace SysMonBar
     // ── Analytics Window ──
     [SupportedOSPlatform("windows")]
     public partial class AnalyticsWindow : Window
-
     {
+        private double _currentKwh;
+        private double _currentAvgWatts;
+
         public AnalyticsWindow()
         {
             InitializeComponent();
             AnalyticsService.EnsureDb();
+            // LoadData(24) will be called after Window_Loaded sets the rate
+        }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            var settings = AppSettings.Load();
+            TxtRate.Text = settings.ElectricityRate.ToString(CultureInfo.InvariantCulture);
             LoadData(24);
         }
 
@@ -153,6 +163,9 @@ namespace SysMonBar
         {
             var (count, avg, max, min, kwh, duration) = AnalyticsService.GetStats(hours);
 
+            _currentKwh = kwh;
+            _currentAvgWatts = avg;
+
             TxtKwh.Text = $"{kwh:F2} kWh";
             TxtAvg.Text = $"{avg:F1} W";
             TxtMax.Text = $"{max:F1} W";
@@ -160,14 +173,38 @@ namespace SysMonBar
             TxtDuration.Text = $"{duration:F1} hours";
             TxtReadings.Text = $"{count}";
 
-            UpdateCost(kwh);
+            UpdateCost();
             DrawChart(hours);
         }
 
-        private void UpdateCost(double kwh)
+        private void TxtRate_TextChanged(object sender, TextChangedEventArgs e)
         {
-            if (double.TryParse(TxtRate.Text, out double rate))
-                TxtCost.Text = $"Estimated: ৳{kwh * rate:F2}";
+            if (!IsLoaded) return;
+            
+            if (double.TryParse(TxtRate.Text, NumberStyles.Any, CultureInfo.InvariantCulture, out double rate))
+            {
+                var settings = AppSettings.Load();
+                settings.ElectricityRate = rate;
+                settings.Save();
+            }
+            
+            UpdateCost();
+        }
+
+        private void UpdateCost()
+        {
+            if (double.TryParse(TxtRate.Text, NumberStyles.Any, CultureInfo.InvariantCulture, out double rate))
+            {
+                double periodCost = _currentKwh * rate;
+                double monthlyKwh = (_currentAvgWatts * 24 * 30) / 1000.0;
+                double monthlyCost = monthlyKwh * rate;
+
+                TxtCost.Text = $"Period: ৳{periodCost:F2}\nEst. Monthly: ৳{monthlyCost:F0}";
+            }
+            else
+            {
+                TxtCost.Text = "Invalid Rate";
+            }
         }
 
         private void DrawLine(Canvas canvas, List<double> values, Color color, string unit)
