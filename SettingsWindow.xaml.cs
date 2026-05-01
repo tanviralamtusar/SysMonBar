@@ -57,6 +57,7 @@ namespace SysMonBar
         public SettingsWindow(AppSettings current)
         {
             InitializeComponent();
+            this.DataContext = this;
             Settings = current;
             Settings.RunOnStartup = CheckStartupStatus();
             LoadSettingsToUI();

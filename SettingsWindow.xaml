@@ -150,7 +150,7 @@
                         <Grid>
                             <TextBlock Text="CPU" Style="{StaticResource PropertyLabel}"/>
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                                <ComboBox x:Name="cbCpuColor" Style="{StaticResource ColorPickerStyle}" ItemsSource="{Binding AvailableColors, RelativeSource={RelativeSource AncestorType=Window}}" SelectedValuePath="Hex" Margin="0,0,12,0"/>
+                                <ComboBox x:Name="cbCpuColor" Style="{StaticResource ColorPickerStyle}" ItemsSource="{Binding AvailableColors}" SelectedValuePath="Hex" Margin="0,0,12,0"/>
                                 <CheckBox x:Name="chkCpu" Style="{StaticResource SwitchStyle}"/>
                             </StackPanel>
                         </Grid>
@@ -161,7 +161,7 @@
                         <Grid>
                             <TextBlock Text="GPU" Style="{StaticResource PropertyLabel}"/>
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                                <ComboBox x:Name="cbGpuColor" Style="{StaticResource ColorPickerStyle}" ItemsSource="{Binding AvailableColors, RelativeSource={RelativeSource AncestorType=Window}}" SelectedValuePath="Hex" Margin="0,0,12,0"/>
+                                <ComboBox x:Name="cbGpuColor" Style="{StaticResource ColorPickerStyle}" ItemsSource="{Binding AvailableColors}" SelectedValuePath="Hex" Margin="0,0,12,0"/>
                                 <CheckBox x:Name="chkGpu" Style="{StaticResource SwitchStyle}"/>
                             </StackPanel>
                         </Grid>
@@ -172,7 +172,7 @@
                         <Grid>
                             <TextBlock Text="Power" Style="{StaticResource PropertyLabel}"/>
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                                <ComboBox x:Name="cbPowerColor" Style="{StaticResource ColorPickerStyle}" ItemsSource="{Binding AvailableColors, RelativeSource={RelativeSource AncestorType=Window}}" SelectedValuePath="Hex" Margin="0,0,12,0"/>
+                                <ComboBox x:Name="cbPowerColor" Style="{StaticResource ColorPickerStyle}" ItemsSource="{Binding AvailableColors}" SelectedValuePath="Hex" Margin="0,0,12,0"/>
                                 <CheckBox x:Name="chkPower" Style="{StaticResource SwitchStyle}"/>
                             </StackPanel>
                         </Grid>
@@ -183,7 +183,7 @@
                         <Grid>
                             <TextBlock Text="Temperature" Style="{StaticResource PropertyLabel}"/>
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                                <ComboBox x:Name="cbTempColor" Style="{StaticResource ColorPickerStyle}" ItemsSource="{Binding AvailableColors, RelativeSource={RelativeSource AncestorType=Window}}" SelectedValuePath="Hex" Margin="0,0,12,0"/>
+                                <ComboBox x:Name="cbTempColor" Style="{StaticResource ColorPickerStyle}" ItemsSource="{Binding AvailableColors}" SelectedValuePath="Hex" Margin="0,0,12,0"/>
                                 <CheckBox x:Name="chkTemp" Style="{StaticResource SwitchStyle}"/>
                             </StackPanel>
                         </Grid>
@@ -200,7 +200,7 @@
                             <Grid>
                                 <TextBlock Text="RAM" Style="{StaticResource PropertyLabel}"/>
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                                    <ComboBox x:Name="cbRamColor" Style="{StaticResource ColorPickerStyle}" ItemsSource="{Binding AvailableColors, RelativeSource={RelativeSource AncestorType=Window}}" SelectedValuePath="Hex" Margin="0,0,12,0"/>
+                                    <ComboBox x:Name="cbRamColor" Style="{StaticResource ColorPickerStyle}" ItemsSource="{Binding AvailableColors}" SelectedValuePath="Hex" Margin="0,0,12,0"/>
                                     <CheckBox x:Name="chkRam" Style="{StaticResource SwitchStyle}"/>
                                 </StackPanel>
                             </Grid>
@@ -225,7 +225,7 @@
                             <Grid>
                                 <TextBlock Text="Network" Style="{StaticResource PropertyLabel}"/>
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                                    <ComboBox x:Name="cbNetColor" Style="{StaticResource ColorPickerStyle}" ItemsSource="{Binding AvailableColors, RelativeSource={RelativeSource AncestorType=Window}}" SelectedValuePath="Hex" Margin="0,0,12,0"/>
+                                    <ComboBox x:Name="cbNetColor" Style="{StaticResource ColorPickerStyle}" ItemsSource="{Binding AvailableColors}" SelectedValuePath="Hex" Margin="0,0,12,0"/>
                                     <CheckBox x:Name="chkNet" Style="{StaticResource SwitchStyle}"/>
                                 </StackPanel>
                             </Grid>
