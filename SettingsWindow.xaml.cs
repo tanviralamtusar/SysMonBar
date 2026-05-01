@@ -19,6 +19,7 @@ namespace SysMonBar
         public string NetUnit { get; set; } = "kbps";
         public bool RunOnStartup { get; set; } = false;
         public string DisplayMode { get; set; } = "Graph";
+        public double GraphWidth { get; set; } = 36;
     }
 
     public partial class SettingsWindow : Window
@@ -48,7 +49,7 @@ namespace SysMonBar
             }
             else
             {
-                MessageBox.Show("SettingsWindow.html not found in " + htmlPath, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                System.Windows.MessageBox.Show("SettingsWindow.html not found in " + htmlPath, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 

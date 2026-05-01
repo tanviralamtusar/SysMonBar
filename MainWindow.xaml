@@ -2,10 +2,11 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:local="clr-namespace:SysMonBar"
-        Title="SysMonBar" Height="38" Width="140"
+        Title="SysMonBar" Height="38" SizeToContent="Width"
         WindowStyle="None" AllowsTransparency="True" Background="Transparent"
         Topmost="True" ShowInTaskbar="False"
-        MouseLeftButtonDown="Window_MouseLeftButtonDown">
+        MouseLeftButtonDown="Window_MouseLeftButtonDown"
+        SizeChanged="Window_SizeChanged">
     <Border Background="#DD2b2b2b" CornerRadius="4">
         <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="3,0">
             <local:MetricControl x:Name="CpuMetric" Margin="1,0" ToolTip="CPU">

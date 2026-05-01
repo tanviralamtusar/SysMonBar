@@ -288,6 +288,20 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Graph Width -->
+            <div class="p-utility-md border-t border-soft-border-gray flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div class="flex items-center gap-utility-sm">
+                    <div class="w-[30px] h-[30px] rounded-[7px] bg-secondary-neutral-gray text-pure-white flex items-center justify-center">
+                        <span class="material-symbols-outlined text-[20px]">width</span>
+                    </div>
+                    <span class="font-body-primary text-[17px] text-absolute-black">Graph Width</span>
+                </div>
+                <div class="flex items-center gap-3 w-full sm:w-[200px]">
+                    <input type="range" id="slider-graph-width" min="12" max="150" value="36" class="w-full accent-primary">
+                    <span id="label-graph-width" class="font-control-label text-[14px] w-[40px] text-right">36px</span>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -307,7 +321,8 @@
         RunOnStartup: false,
         RamUnit: "GB",
         NetUnit: "kbps",
-        DisplayMode: "Graph"
+        DisplayMode: "Graph",
+        GraphWidth: 36
     };
 
     function updateSwitchUI(id, active) {
@@ -384,6 +399,12 @@
             document.getElementById(btnId)?.addEventListener('click', () => setSegment('DisplayMode', val, dispBtns));
         }
 
+        const sliderGraphWidth = document.getElementById('slider-graph-width');
+        sliderGraphWidth?.addEventListener('input', (e) => {
+            settings.GraphWidth = parseInt(e.target.value);
+            document.getElementById('label-graph-width').innerText = settings.GraphWidth + 'px';
+        });
+
         document.getElementById('btn-save')?.addEventListener('click', () => {
             if (window.chrome && window.chrome.webview) {
                 window.chrome.webview.postMessage(JSON.stringify({ action: "SAVE", payload: settings }));
@@ -413,6 +434,13 @@
             setSegment('RamUnit', settings.RamUnit, ramBtns);
             setSegment('NetUnit', settings.NetUnit, netBtns);
             setSegment('DisplayMode', settings.DisplayMode || 'Graph', dispBtns);
+            
+            settings.GraphWidth = settings.GraphWidth || 36;
+            const sliderGraphWidth = document.getElementById('slider-graph-width');
+            if (sliderGraphWidth) {
+                sliderGraphWidth.value = settings.GraphWidth;
+                document.getElementById('label-graph-width').innerText = settings.GraphWidth + 'px';
+            }
         } catch (e) {
             console.error("Failed to parse settings", e);
         }

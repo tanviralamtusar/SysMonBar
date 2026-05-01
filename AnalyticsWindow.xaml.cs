@@ -21,6 +21,11 @@ namespace SysMonBar
         public double PowerWatts { get; set; }
         public double CpuTemp { get; set; }
         public double GpuTemp { get; set; }
+        public double CpuUsage { get; set; }
+        public double GpuUsage { get; set; }
+        public double RamUsageGb { get; set; }
+        public double NetUp { get; set; }
+        public double NetDown { get; set; }
     }
 
     public class AppDbContext : DbContext
@@ -40,18 +45,30 @@ namespace SysMonBar
         {
             using var db = new AppDbContext();
             db.Database.EnsureCreated();
+
+            // Try adding columns safely
+            try { db.Database.ExecuteSqlRaw("ALTER TABLE PowerReadings ADD COLUMN CpuUsage REAL NOT NULL DEFAULT 0;"); } catch { }
+            try { db.Database.ExecuteSqlRaw("ALTER TABLE PowerReadings ADD COLUMN GpuUsage REAL NOT NULL DEFAULT 0;"); } catch { }
+            try { db.Database.ExecuteSqlRaw("ALTER TABLE PowerReadings ADD COLUMN RamUsageGb REAL NOT NULL DEFAULT 0;"); } catch { }
+            try { db.Database.ExecuteSqlRaw("ALTER TABLE PowerReadings ADD COLUMN NetUp REAL NOT NULL DEFAULT 0;"); } catch { }
+            try { db.Database.ExecuteSqlRaw("ALTER TABLE PowerReadings ADD COLUMN NetDown REAL NOT NULL DEFAULT 0;"); } catch { }
         }
 
-        public static void LogReading(double watts, double cpuTemp, double gpuTemp)
+        public static void LogReading(HardwareStats stats)
         {
             try
             {
                 using var db = new AppDbContext();
                 db.PowerReadings.Add(new PowerReading
                 {
-                    PowerWatts = watts,
-                    CpuTemp = cpuTemp,
-                    GpuTemp = gpuTemp
+                    PowerWatts = stats.PowerWatts,
+                    CpuTemp = stats.CpuTemp,
+                    GpuTemp = stats.GpuTemp,
+                    CpuUsage = stats.CpuUsage,
+                    GpuUsage = stats.GpuUsage,
+                    RamUsageGb = stats.RamUsedGb,
+                    NetUp = stats.NetUp,
+                    NetDown = stats.NetDown
                 });
                 db.SaveChanges();
             }
@@ -77,7 +94,7 @@ namespace SysMonBar
             return (readings.Count, avg, max, min, kwh, hoursOfData);
         }
 
-        public static List<(string label, double value)> GetHourlyAverage(int hours)
+        public static List<(string label, double power, double cpuTemp, double gpuTemp, double cpuUsage, double gpuUsage, double ramGb, double net)> GetHourlyAverage(int hours)
         {
             using var db = new AppDbContext();
             var since = DateTime.Now.AddHours(-hours);
@@ -85,8 +102,17 @@ namespace SysMonBar
                 .Where(r => r.Timestamp > since)
                 .AsEnumerable()
                 .GroupBy(r => r.Timestamp.ToString("HH") + "h")
-                .Select(g => (g.Key, g.Average(r => r.PowerWatts)))
-                .OrderBy(x => x.Key)
+                .Select(g => (
+                    g.Key, 
+                    g.Average(r => r.PowerWatts),
+                    g.Average(r => r.CpuTemp),
+                    g.Average(r => r.GpuTemp),
+                    g.Average(r => r.CpuUsage),
+                    g.Average(r => r.GpuUsage),
+                    g.Average(r => r.RamUsageGb),
+                    g.Average(r => r.NetUp + r.NetDown)
+                ))
+                .OrderBy(x => x.Item1)
                 .ToList();
         }
     }
@@ -140,41 +166,92 @@ namespace SysMonBar
                 TxtCost.Text = $"Estimated: ৳{kwh * rate:F2}";
         }
 
-        private void DrawChart(int hours)
+        private void DrawLine(Canvas canvas, List<double> values, Color color, string unit)
         {
-            ChartCanvas.Children.Clear();
-            var data = AnalyticsService.GetHourlyAverage(hours);
-            if (data.Count < 2) return;
+            canvas.Children.Clear();
+            if (values.Count < 2) return;
 
-            double w = ChartCanvas.ActualWidth > 0 ? ChartCanvas.ActualWidth : 480;
-            double h = ChartCanvas.ActualHeight > 0 ? ChartCanvas.ActualHeight : 140;
-            double maxVal = data.Max(d => d.value);
-            if (maxVal < 1) maxVal = 100;
+            double w = canvas.ActualWidth > 0 ? canvas.ActualWidth : 480;
+            double h = canvas.ActualHeight > 0 ? canvas.ActualHeight : 100;
+            double maxVal = values.Max();
+            if (maxVal < 1) maxVal = 10;
 
-            // Draw line chart
             var polyline = new Polyline
             {
-                Stroke = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#3498db")),
+                Stroke = new SolidColorBrush(color),
                 StrokeThickness = 2
             };
 
-            for (int i = 0; i < data.Count; i++)
+            for (int i = 0; i < values.Count; i++)
             {
-                double x = (i / (double)(data.Count - 1)) * (w - 20) + 10;
-                double y = h - (data[i].value / maxVal * (h - 20)) - 10;
+                double x = (i / (double)(values.Count - 1)) * (w - 20) + 10;
+                double y = h - (values[i] / maxVal * (h - 20)) - 10;
                 polyline.Points.Add(new Point(x, y));
             }
 
-            ChartCanvas.Children.Add(polyline);
+            canvas.Children.Add(polyline);
 
-            // Axis labels
-            var maxLabel = new TextBlock { Text = $"{maxVal:F0}W", Foreground = new SolidColorBrush(Colors.Gray), FontSize = 10 };
+            var maxLabel = new TextBlock { Text = $"{maxVal:F0}{unit}", Foreground = new SolidColorBrush(Colors.Gray), FontSize = 10 };
             Canvas.SetLeft(maxLabel, 2); Canvas.SetTop(maxLabel, 2);
-            ChartCanvas.Children.Add(maxLabel);
+            canvas.Children.Add(maxLabel);
 
-            var minLabel = new TextBlock { Text = "0W", Foreground = new SolidColorBrush(Colors.Gray), FontSize = 10 };
+            var minLabel = new TextBlock { Text = $"0{unit}", Foreground = new SolidColorBrush(Colors.Gray), FontSize = 10 };
             Canvas.SetLeft(minLabel, 2); Canvas.SetTop(minLabel, h - 16);
-            ChartCanvas.Children.Add(minLabel);
+            canvas.Children.Add(minLabel);
+        }
+
+        private void DrawMultiLine(Canvas canvas, List<double> values1, Color color1, List<double> values2, Color color2, string unit)
+        {
+            canvas.Children.Clear();
+            if (values1.Count < 2 || values2.Count < 2) return;
+
+            double w = canvas.ActualWidth > 0 ? canvas.ActualWidth : 480;
+            double h = canvas.ActualHeight > 0 ? canvas.ActualHeight : 100;
+            double maxVal = Math.Max(values1.Max(), values2.Max());
+            if (maxVal < 1) maxVal = 10;
+
+            Action<List<double>, Color> drawLine = (vals, col) => 
+            {
+                var polyline = new Polyline { Stroke = new SolidColorBrush(col), StrokeThickness = 2 };
+                for (int i = 0; i < vals.Count; i++)
+                {
+                    double x = (i / (double)(vals.Count - 1)) * (w - 20) + 10;
+                    double y = h - (vals[i] / maxVal * (h - 20)) - 10;
+                    polyline.Points.Add(new Point(x, y));
+                }
+                canvas.Children.Add(polyline);
+            };
+
+            drawLine(values1, color1);
+            drawLine(values2, color2);
+
+            var maxLabel = new TextBlock { Text = $"{maxVal:F0}{unit}", Foreground = new SolidColorBrush(Colors.Gray), FontSize = 10 };
+            Canvas.SetLeft(maxLabel, 2); Canvas.SetTop(maxLabel, 2);
+            canvas.Children.Add(maxLabel);
+
+            var minLabel = new TextBlock { Text = $"0{unit}", Foreground = new SolidColorBrush(Colors.Gray), FontSize = 10 };
+            Canvas.SetLeft(minLabel, 2); Canvas.SetTop(minLabel, h - 16);
+            canvas.Children.Add(minLabel);
+        }
+
+        private void DrawChart(int hours)
+        {
+            var data = AnalyticsService.GetHourlyAverage(hours);
+            if (data.Count < 2) 
+            {
+                PowerCanvas.Children.Clear();
+                TempCanvas.Children.Clear();
+                UsageCanvas.Children.Clear();
+                RamCanvas.Children.Clear();
+                NetCanvas.Children.Clear();
+                return;
+            }
+
+            DrawLine(PowerCanvas, data.Select(d => d.power).ToList(), (Color)ColorConverter.ConvertFromString("#f1c40f"), "W");
+            DrawMultiLine(TempCanvas, data.Select(d => d.cpuTemp).ToList(), (Color)ColorConverter.ConvertFromString("#e74c3c"), data.Select(d => d.gpuTemp).ToList(), (Color)ColorConverter.ConvertFromString("#2ecc71"), "°C");
+            DrawMultiLine(UsageCanvas, data.Select(d => d.cpuUsage).ToList(), (Color)ColorConverter.ConvertFromString("#3498db"), data.Select(d => d.gpuUsage).ToList(), (Color)ColorConverter.ConvertFromString("#9b59b6"), "%");
+            DrawLine(RamCanvas, data.Select(d => d.ramGb).ToList(), (Color)ColorConverter.ConvertFromString("#1abc9c"), "GB");
+            DrawLine(NetCanvas, data.Select(d => d.net / 1024.0).ToList(), (Color)ColorConverter.ConvertFromString("#e67e22"), "KB/s");
         }
     }
 }
