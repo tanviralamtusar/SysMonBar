@@ -1,6 +1,8 @@
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Shapes;
 using Brush = System.Windows.Media.Brush;
 using Brushes = System.Windows.Media.Brushes;
 using UserControl = System.Windows.Controls.UserControl;
@@ -21,6 +23,16 @@ namespace SysMonBar
             DependencyProperty.Register("MaxValue", typeof(double), typeof(MetricControl),
                 new PropertyMetadata(100.0));
 
+        public static readonly DependencyProperty DisplayModeProperty =
+            DependencyProperty.Register("DisplayMode", typeof(string), typeof(MetricControl),
+                new PropertyMetadata("Bar", OnModeChanged));
+
+        public static readonly DependencyProperty GraphWidthProperty =
+            DependencyProperty.Register("GraphWidth", typeof(double), typeof(MetricControl),
+                new PropertyMetadata(36.0, OnModeChanged));
+
+        private List<double> _history = new List<double>();
+
         public Brush Color
         {
             get => (Brush)GetValue(ColorProperty);
@@ -37,6 +49,18 @@ namespace SysMonBar
         {
             get => (double)GetValue(MaxValueProperty);
             set => SetValue(MaxValueProperty, value);
+        }
+
+        public string DisplayMode
+        {
+            get => (string)GetValue(DisplayModeProperty);
+            set => SetValue(DisplayModeProperty, value);
+        }
+
+        public double GraphWidth
+        {
+            get => (double)GetValue(GraphWidthProperty);
+            set => SetValue(GraphWidthProperty, value);
         }
 
         public MetricControl()
@@ -56,13 +80,61 @@ namespace SysMonBar
             ctrl.UpdateBar();
         }
 
+        private static void OnModeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            var ctrl = (MetricControl)d;
+            if (ctrl.DisplayMode == "Graph")
+            {
+                ctrl.Width = ctrl.GraphWidth;
+            }
+            else
+            {
+                ctrl.Width = 12;
+            }
+            ctrl.UpdateBar();
+        }
+
         private void UpdateBar()
         {
             if (ActualHeight <= 0) return;
-            double pct = MaxValue > 0 ? (Value / MaxValue) : 0;
-            if (pct > 1) pct = 1;
-            BarRect.Height = pct * ActualHeight;
-            BarRect.Fill = Color;
+
+            // Maintain history
+            _history.Add(Value);
+            if (_history.Count > 20) _history.RemoveAt(0);
+
+            if (DisplayMode == "Graph")
+            {
+                BarRect.Visibility = Visibility.Collapsed;
+                GraphLine.Visibility = Visibility.Visible;
+                GraphLine.Stroke = Color;
+
+                GraphLine.Points.Clear();
+                double maxVal = MaxValue > 0 ? MaxValue : 100;
+                
+                double widthScale = ActualWidth > 0 ? ActualWidth : Width;
+                
+                for (int i = 0; i < _history.Count; i++)
+                {
+                    double x = (i / (double)(20 - 1)) * widthScale;
+                    
+                    double pct = _history[i] / maxVal;
+                    if (pct > 1) pct = 1;
+                    if (pct < 0) pct = 0;
+                    
+                    double y = ActualHeight - (pct * ActualHeight);
+                    GraphLine.Points.Add(new System.Windows.Point(x, y));
+                }
+            }
+            else
+            {
+                GraphLine.Visibility = Visibility.Collapsed;
+                BarRect.Visibility = Visibility.Visible;
+
+                double pct = MaxValue > 0 ? (Value / MaxValue) : 0;
+                if (pct > 1) pct = 1;
+                BarRect.Height = pct * ActualHeight;
+                BarRect.Fill = Color;
+            }
         }
     }
 }

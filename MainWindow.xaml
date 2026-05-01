@@ -2,38 +2,23 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:local="clr-namespace:SysMonBar"
-        Title="SysMonBar" Height="38" Width="140"
+        Title="SysMonBar" Height="38" SizeToContent="Width"
         WindowStyle="None" AllowsTransparency="True" Background="Transparent"
         Topmost="True" ShowInTaskbar="False"
-        MouseLeftButtonDown="Window_MouseLeftButtonDown">
+        MouseLeftButtonDown="Window_MouseLeftButtonDown"
+        SizeChanged="Window_SizeChanged">
     <Border Background="#DD2b2b2b" CornerRadius="4">
         <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="3,0">
-            <local:MetricControl x:Name="CpuMetric" Margin="1,0" ToolTip="CPU">
-                <local:MetricControl.Color>
-                    <SolidColorBrush Color="#3498db"/>
-                </local:MetricControl.Color>
-            </local:MetricControl>
-            <local:MetricControl x:Name="RamMetric" Margin="1,0" ToolTip="RAM">
-                <local:MetricControl.Color>
-                    <SolidColorBrush Color="#9b59b6"/>
-                </local:MetricControl.Color>
-            </local:MetricControl>
-            <local:MetricControl x:Name="GpuMetric" Margin="1,0" ToolTip="GPU">
-                <local:MetricControl.Color>
-                    <SolidColorBrush Color="#2ecc71"/>
-                </local:MetricControl.Color>
-            </local:MetricControl>
-            <local:MetricControl x:Name="NetMetric" Margin="1,0" ToolTip="Network">
-                <local:MetricControl.Color>
-                    <SolidColorBrush Color="#1abc9c"/>
-                </local:MetricControl.Color>
-            </local:MetricControl>
+            <local:MetricControl x:Name="CpuMetric" Margin="1,0" ToolTip="CPU"/>
+            <local:MetricControl x:Name="RamMetric" Margin="1,0" ToolTip="RAM"/>
+            <local:MetricControl x:Name="GpuMetric" Margin="1,0" ToolTip="GPU"/>
+            <local:MetricControl x:Name="NetMetric" Margin="1,0" ToolTip="Network"/>
 
-            <TextBlock x:Name="PowerText" Text="0W" Foreground="#e67e22"
+            <TextBlock x:Name="PowerText" Text="0W"
                        FontFamily="Segoe UI" FontSize="9" FontWeight="Bold"
                        VerticalAlignment="Center" Width="28" TextAlignment="Center" Margin="2,0"/>
 
-            <TextBlock x:Name="TempText" Text="0°C" Foreground="#e74c3c"
+            <TextBlock x:Name="TempText" Text="0°C"
                        FontFamily="Segoe UI" FontSize="9" FontWeight="Bold"
                        VerticalAlignment="Center" Width="28" TextAlignment="Center" Margin="2,0"/>
         </StackPanel>

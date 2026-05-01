@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
+using System.Windows.Media;
 using System.Windows.Threading;
 
 namespace SysMonBar
@@ -12,7 +13,7 @@ namespace SysMonBar
         private readonly HardwareMonitor _monitor;
         private readonly DispatcherTimer _updateTimer;
         private readonly DispatcherTimer _topMostTimer;
-        private AppSettings _settings = new();
+        private AppSettings _settings;
         private DateTime _lastLogTime = DateTime.Now;
 
         // Win32 API for staying above taskbar
@@ -35,6 +36,7 @@ namespace SysMonBar
 
         public MainWindow()
         {
+            _settings = AppSettings.Load();
             InitializeComponent();
 
             // Init database
@@ -70,9 +72,22 @@ namespace SysMonBar
 
         private void UpdatePosition()
         {
-            var workArea = SystemParameters.WorkArea;
-            Left = workArea.Right - Width - 300;
-            Top = workArea.Bottom - Height;
+            if (_settings.WindowLeft.HasValue && _settings.WindowTop.HasValue)
+            {
+                Left = _settings.WindowLeft.Value;
+                Top = _settings.WindowTop.Value;
+            }
+            else
+            {
+                var workArea = SystemParameters.WorkArea;
+                Left = workArea.Right - ActualWidth - 300;
+                Top = workArea.Bottom - ActualHeight;
+            }
+        }
+
+        private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            UpdatePosition();
         }
 
         private void ForceTopMost()
@@ -83,9 +98,28 @@ namespace SysMonBar
                     SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_SHOWWINDOW);
         }
 
+        private System.Windows.Media.Brush GetBrush(string hex)
+        {
+            try
+            {
+                var color = (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(hex);
+                return new System.Windows.Media.SolidColorBrush(color);
+            }
+            catch
+            {
+                return new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.Gray);
+            }
+        }
+
         private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            DragMove();
+            if (!_settings.LockPosition)
+            {
+                DragMove();
+                _settings.WindowLeft = this.Left;
+                _settings.WindowTop = this.Top;
+                _settings.Save();
+            }
         }
 
         private void Timer_Tick(object? sender, EventArgs e)
@@ -98,6 +132,9 @@ namespace SysMonBar
                 if (_settings.ShowCpu) { CpuMetric.Visibility = Visibility.Visible; }
                 else { CpuMetric.Visibility = Visibility.Collapsed; }
                 CpuMetric.Value = stats.CpuUsage;
+                CpuMetric.GraphWidth = _settings.GraphWidth;
+                CpuMetric.Color = GetBrush(_settings.CpuColor);
+                CpuMetric.DisplayMode = _settings.DisplayMode;
                 CpuMetric.ToolTip = $"CPU: {stats.CpuUsage:F0}%";
 
                 // RAM
@@ -105,6 +142,9 @@ namespace SysMonBar
                 else { RamMetric.Visibility = Visibility.Collapsed; }
                 RamMetric.Value = stats.RamUsedGb;
                 RamMetric.MaxValue = stats.RamTotalGb;
+                RamMetric.GraphWidth = _settings.GraphWidth;
+                RamMetric.Color = GetBrush(_settings.RamColor);
+                RamMetric.DisplayMode = _settings.DisplayMode;
                 if (_settings.RamUnit == "MB")
                     RamMetric.ToolTip = $"RAM: {stats.RamUsedGb * 1024:F0}/{stats.RamTotalGb * 1024:F0} MB";
                 else
@@ -114,6 +154,9 @@ namespace SysMonBar
                 if (_settings.ShowGpu) { GpuMetric.Visibility = Visibility.Visible; }
                 else { GpuMetric.Visibility = Visibility.Collapsed; }
                 GpuMetric.Value = stats.GpuUsage;
+                GpuMetric.GraphWidth = _settings.GraphWidth;
+                GpuMetric.Color = GetBrush(_settings.GpuColor);
+                GpuMetric.DisplayMode = _settings.DisplayMode;
                 GpuMetric.ToolTip = $"GPU: {stats.GpuUsage:F0}%";
 
                 // Network
@@ -123,24 +166,29 @@ namespace SysMonBar
                 double netUp = stats.NetUp;
                 NetMetric.Value = netDown + netUp;
                 NetMetric.MaxValue = 10;
+                NetMetric.GraphWidth = _settings.GraphWidth;
+                NetMetric.Color = GetBrush(_settings.NetColor);
+                NetMetric.DisplayMode = _settings.DisplayMode;
                 string netText = FormatNet(netDown, _settings.NetUnit) + " / " + FormatNet(netUp, _settings.NetUnit);
                 NetMetric.ToolTip = $"↓{FormatNet(netDown, _settings.NetUnit)}  ↑{FormatNet(netUp, _settings.NetUnit)}";
 
                 // Power
                 if (_settings.ShowPower) { PowerText.Visibility = Visibility.Visible; }
                 else { PowerText.Visibility = Visibility.Collapsed; }
+                PowerText.Foreground = GetBrush(_settings.PowerColor);
                 PowerText.Text = $"{stats.PowerWatts:F0}W";
 
                 // Temp
                 if (_settings.ShowTemp) { TempText.Visibility = Visibility.Visible; }
                 else { TempText.Visibility = Visibility.Collapsed; }
+                TempText.Foreground = GetBrush(_settings.TempColor);
                 TempText.Text = $"{stats.CombinedTemp:F0}°C";
                 TempText.ToolTip = $"CPU: {stats.CpuTemp:F0}°C | GPU: {stats.GpuTemp:F0}°C";
 
                 // Log to database every 60 seconds
                 if ((DateTime.Now - _lastLogTime).TotalSeconds >= 60)
                 {
-                    AnalyticsService.LogReading(stats.PowerWatts, stats.CpuTemp, stats.GpuTemp);
+                    AnalyticsService.LogReading(stats);
                     _lastLogTime = DateTime.Now;
                 }
             }
@@ -167,6 +215,7 @@ namespace SysMonBar
             if (dlg.ShowDialog() == true && dlg.Saved)
             {
                 _settings = dlg.Settings;
+                _settings.Save();
             }
         }
 

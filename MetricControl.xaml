@@ -4,5 +4,6 @@
              Width="12" Height="30">
     <Grid x:Name="RootGrid" Background="#2b2b2b">
         <Rectangle x:Name="BarRect" VerticalAlignment="Bottom" Width="8" Height="0" HorizontalAlignment="Center"/>
+        <Polyline x:Name="GraphLine" StrokeThickness="1.5" Visibility="Collapsed" />
     </Grid>
 </UserControl>
