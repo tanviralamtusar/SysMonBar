@@ -14,6 +14,14 @@ namespace SysMonBar
         public bool ShowNet { get; set; } = true;
         public bool ShowPower { get; set; } = true;
         public bool ShowTemp { get; set; } = true;
+        
+        public string CpuColor { get; set; } = "#3498db";
+        public string RamColor { get; set; } = "#9b59b6";
+        public string GpuColor { get; set; } = "#2ecc71";
+        public string NetColor { get; set; } = "#1abc9c";
+        public string PowerColor { get; set; } = "#e67e22";
+        public string TempColor { get; set; } = "#e74c3c";
+
         public string RamUnit { get; set; } = "GB";
         public string NetUnit { get; set; } = "kbps";
         public bool RunOnStartup { get; set; } = false;
@@ -21,8 +29,28 @@ namespace SysMonBar
         public double GraphWidth { get; set; } = 36;
     }
 
+    public class ColorOption
+    {
+        public string Name { get; set; } = string.Empty;
+        public string Hex { get; set; } = string.Empty;
+    }
+
     public partial class SettingsWindow : Window
     {
+        public List<ColorOption> AvailableColors { get; } = new List<ColorOption>
+        {
+            new ColorOption { Name = "Blue", Hex = "#3498db" },
+            new ColorOption { Name = "Purple", Hex = "#9b59b6" },
+            new ColorOption { Name = "Green", Hex = "#2ecc71" },
+            new ColorOption { Name = "Cyan", Hex = "#1abc9c" },
+            new ColorOption { Name = "Orange", Hex = "#e67e22" },
+            new ColorOption { Name = "Red", Hex = "#e74c3c" },
+            new ColorOption { Name = "Yellow", Hex = "#f1c40f" },
+            new ColorOption { Name = "Pink", Hex = "#e84393" },
+            new ColorOption { Name = "White", Hex = "#ffffff" },
+            new ColorOption { Name = "Gray", Hex = "#95a5a6" }
+        };
+
         public AppSettings Settings { get; private set; }
         public bool Saved { get; private set; }
 
@@ -43,6 +71,13 @@ namespace SysMonBar
             chkPower.IsChecked = Settings.ShowPower;
             chkTemp.IsChecked = Settings.ShowTemp;
             chkStartup.IsChecked = Settings.RunOnStartup;
+
+            cbCpuColor.SelectedValue = Settings.CpuColor;
+            cbRamColor.SelectedValue = Settings.RamColor;
+            cbGpuColor.SelectedValue = Settings.GpuColor;
+            cbNetColor.SelectedValue = Settings.NetColor;
+            cbPowerColor.SelectedValue = Settings.PowerColor;
+            cbTempColor.SelectedValue = Settings.TempColor;
 
             rbRamGB.IsChecked = Settings.RamUnit == "GB";
             rbRamMB.IsChecked = Settings.RamUnit == "MB";
@@ -68,6 +103,13 @@ namespace SysMonBar
             Settings.ShowPower = chkPower.IsChecked ?? true;
             Settings.ShowTemp = chkTemp.IsChecked ?? true;
             Settings.RunOnStartup = chkStartup.IsChecked ?? false;
+
+            if (cbCpuColor.SelectedValue != null) Settings.CpuColor = cbCpuColor.SelectedValue.ToString()!;
+            if (cbRamColor.SelectedValue != null) Settings.RamColor = cbRamColor.SelectedValue.ToString()!;
+            if (cbGpuColor.SelectedValue != null) Settings.GpuColor = cbGpuColor.SelectedValue.ToString()!;
+            if (cbNetColor.SelectedValue != null) Settings.NetColor = cbNetColor.SelectedValue.ToString()!;
+            if (cbPowerColor.SelectedValue != null) Settings.PowerColor = cbPowerColor.SelectedValue.ToString()!;
+            if (cbTempColor.SelectedValue != null) Settings.TempColor = cbTempColor.SelectedValue.ToString()!;
 
             if (rbRamGB.IsChecked == true) Settings.RamUnit = "GB";
             else if (rbRamMB.IsChecked == true) Settings.RamUnit = "MB";

@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
+using System.Windows.Media;
 using System.Windows.Threading;
 
 namespace SysMonBar
@@ -88,6 +89,19 @@ namespace SysMonBar
                     SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_SHOWWINDOW);
         }
 
+        private System.Windows.Media.Brush GetBrush(string hex)
+        {
+            try
+            {
+                var color = (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(hex);
+                return new System.Windows.Media.SolidColorBrush(color);
+            }
+            catch
+            {
+                return new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.Gray);
+            }
+        }
+
         private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             DragMove();
@@ -104,6 +118,7 @@ namespace SysMonBar
                 else { CpuMetric.Visibility = Visibility.Collapsed; }
                 CpuMetric.Value = stats.CpuUsage;
                 CpuMetric.GraphWidth = _settings.GraphWidth;
+                CpuMetric.Color = GetBrush(_settings.CpuColor);
                 CpuMetric.DisplayMode = _settings.DisplayMode;
                 CpuMetric.ToolTip = $"CPU: {stats.CpuUsage:F0}%";
 
@@ -113,6 +128,7 @@ namespace SysMonBar
                 RamMetric.Value = stats.RamUsedGb;
                 RamMetric.MaxValue = stats.RamTotalGb;
                 RamMetric.GraphWidth = _settings.GraphWidth;
+                RamMetric.Color = GetBrush(_settings.RamColor);
                 RamMetric.DisplayMode = _settings.DisplayMode;
                 if (_settings.RamUnit == "MB")
                     RamMetric.ToolTip = $"RAM: {stats.RamUsedGb * 1024:F0}/{stats.RamTotalGb * 1024:F0} MB";
@@ -124,6 +140,7 @@ namespace SysMonBar
                 else { GpuMetric.Visibility = Visibility.Collapsed; }
                 GpuMetric.Value = stats.GpuUsage;
                 GpuMetric.GraphWidth = _settings.GraphWidth;
+                GpuMetric.Color = GetBrush(_settings.GpuColor);
                 GpuMetric.DisplayMode = _settings.DisplayMode;
                 GpuMetric.ToolTip = $"GPU: {stats.GpuUsage:F0}%";
 
@@ -135,6 +152,7 @@ namespace SysMonBar
                 NetMetric.Value = netDown + netUp;
                 NetMetric.MaxValue = 10;
                 NetMetric.GraphWidth = _settings.GraphWidth;
+                NetMetric.Color = GetBrush(_settings.NetColor);
                 NetMetric.DisplayMode = _settings.DisplayMode;
                 string netText = FormatNet(netDown, _settings.NetUnit) + " / " + FormatNet(netUp, _settings.NetUnit);
                 NetMetric.ToolTip = $"↓{FormatNet(netDown, _settings.NetUnit)}  ↑{FormatNet(netUp, _settings.NetUnit)}";
@@ -142,11 +160,13 @@ namespace SysMonBar
                 // Power
                 if (_settings.ShowPower) { PowerText.Visibility = Visibility.Visible; }
                 else { PowerText.Visibility = Visibility.Collapsed; }
+                PowerText.Foreground = GetBrush(_settings.PowerColor);
                 PowerText.Text = $"{stats.PowerWatts:F0}W";
 
                 // Temp
                 if (_settings.ShowTemp) { TempText.Visibility = Visibility.Visible; }
                 else { TempText.Visibility = Visibility.Collapsed; }
+                TempText.Foreground = GetBrush(_settings.TempColor);
                 TempText.Text = $"{stats.CombinedTemp:F0}°C";
                 TempText.ToolTip = $"CPU: {stats.CpuTemp:F0}°C | GPU: {stats.GpuTemp:F0}°C";
 
