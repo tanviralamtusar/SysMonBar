@@ -31,6 +31,10 @@ namespace SysMonBar
             DependencyProperty.Register("GraphWidth", typeof(double), typeof(MetricControl),
                 new PropertyMetadata(36.0, OnModeChanged));
 
+        public static readonly DependencyProperty TextValueProperty =
+            DependencyProperty.Register("TextValue", typeof(string), typeof(MetricControl),
+                new PropertyMetadata("", OnTextValueChanged));
+
         private List<double> _history = new List<double>();
 
         public Brush Color
@@ -63,6 +67,12 @@ namespace SysMonBar
             set => SetValue(GraphWidthProperty, value);
         }
 
+        public string TextValue
+        {
+            get => (string)GetValue(TextValueProperty);
+            set => SetValue(TextValueProperty, value);
+        }
+
         public MetricControl()
         {
             InitializeComponent();
@@ -72,6 +82,7 @@ namespace SysMonBar
         {
             var ctrl = (MetricControl)d;
             ctrl.BarRect.Fill = (Brush)e.NewValue;
+            ctrl.TextDisplay.Foreground = (Brush)e.NewValue;
         }
 
         private static void OnValueChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -80,12 +91,22 @@ namespace SysMonBar
             ctrl.UpdateBar();
         }
 
+        private static void OnTextValueChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            var ctrl = (MetricControl)d;
+            ctrl.TextDisplay.Text = (string)e.NewValue;
+        }
+
         private static void OnModeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var ctrl = (MetricControl)d;
             if (ctrl.DisplayMode == "Graph")
             {
                 ctrl.Width = ctrl.GraphWidth;
+            }
+            else if (ctrl.DisplayMode == "Text")
+            {
+                ctrl.Width = double.NaN; // Auto
             }
             else
             {
@@ -105,6 +126,7 @@ namespace SysMonBar
             if (DisplayMode == "Graph")
             {
                 BarRect.Visibility = Visibility.Collapsed;
+                TextDisplay.Visibility = Visibility.Collapsed;
                 GraphLine.Visibility = Visibility.Visible;
                 GraphLine.Stroke = Color;
 
@@ -125,9 +147,16 @@ namespace SysMonBar
                     GraphLine.Points.Add(new System.Windows.Point(x, y));
                 }
             }
+            else if (DisplayMode == "Text")
+            {
+                GraphLine.Visibility = Visibility.Collapsed;
+                BarRect.Visibility = Visibility.Collapsed;
+                TextDisplay.Visibility = Visibility.Visible;
+            }
             else
             {
                 GraphLine.Visibility = Visibility.Collapsed;
+                TextDisplay.Visibility = Visibility.Collapsed;
                 BarRect.Visibility = Visibility.Visible;
 
                 double pct = MaxValue > 0 ? (Value / MaxValue) : 0;
