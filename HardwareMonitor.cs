@@ -64,6 +64,7 @@ namespace SysMonBar
         private float _lastCpuTemp;
         private bool _isDisposed;
         private Thread? _wmiThread;
+        private readonly UpdateVisitor _visitor = new();
 
         public HardwareMonitor()
         {
@@ -214,7 +215,7 @@ namespace SysMonBar
             {
                 try
                 {
-                    _computer.Accept(new UpdateVisitor());
+                    _computer.Accept(_visitor);
 
                     // Track sensor priorities: higher = better/more reliable source
                     int cpuTempPriority = 0;

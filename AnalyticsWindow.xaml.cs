@@ -6,7 +6,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.Data.Sqlite;
 using Color = System.Windows.Media.Color;
 using ColorConverter = System.Windows.Media.ColorConverter;
 using Point = System.Windows.Point;
@@ -17,11 +17,10 @@ using System.Windows.Threading;
 
 namespace SysMonBar
 {
-    // ── EF Core Database ──
     public class PowerReading
     {
         public int Id { get; set; }
-        public DateTime Timestamp { get; set; } = DateTime.Now;
+        public DateTime Timestamp { get; set; }
         public double PowerWatts { get; set; }
         public double CpuTemp { get; set; }
         public double GpuTemp { get; set; }
@@ -32,92 +31,156 @@ namespace SysMonBar
         public double NetDown { get; set; }
     }
 
-    public class AppDbContext : DbContext
-    {
-        public DbSet<PowerReading> PowerReadings => Set<PowerReading>();
-
-        protected override void OnConfiguring(DbContextOptionsBuilder options)
-        {
-            var dbPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "power_data.db");
-            options.UseSqlite($"Data Source={dbPath}");
-        }
-    }
-
     public static class AnalyticsService
     {
+        private static string GetConnectionString()
+        {
+            var dbPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "power_data.db");
+            return $"Data Source={dbPath}";
+        }
+
         public static void EnsureDb()
         {
-            using var db = new AppDbContext();
-            db.Database.EnsureCreated();
+            using var connection = new SqliteConnection(GetConnectionString());
+            connection.Open();
 
-            // Try adding columns safely
-            try { db.Database.ExecuteSqlRaw("ALTER TABLE PowerReadings ADD COLUMN CpuUsage REAL NOT NULL DEFAULT 0;"); } catch { }
-            try { db.Database.ExecuteSqlRaw("ALTER TABLE PowerReadings ADD COLUMN GpuUsage REAL NOT NULL DEFAULT 0;"); } catch { }
-            try { db.Database.ExecuteSqlRaw("ALTER TABLE PowerReadings ADD COLUMN RamUsageGb REAL NOT NULL DEFAULT 0;"); } catch { }
-            try { db.Database.ExecuteSqlRaw("ALTER TABLE PowerReadings ADD COLUMN NetUp REAL NOT NULL DEFAULT 0;"); } catch { }
-            try { db.Database.ExecuteSqlRaw("ALTER TABLE PowerReadings ADD COLUMN NetDown REAL NOT NULL DEFAULT 0;"); } catch { }
+            var command = connection.CreateCommand();
+            command.CommandText = 
+            @"
+                CREATE TABLE IF NOT EXISTS PowerReadings (
+                    Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    Timestamp TEXT NOT NULL,
+                    PowerWatts REAL NOT NULL,
+                    CpuTemp REAL NOT NULL,
+                    GpuTemp REAL NOT NULL,
+                    CpuUsage REAL NOT NULL DEFAULT 0,
+                    GpuUsage REAL NOT NULL DEFAULT 0,
+                    RamUsageGb REAL NOT NULL DEFAULT 0,
+                    NetUp REAL NOT NULL DEFAULT 0,
+                    NetDown REAL NOT NULL DEFAULT 0
+                );
+            ";
+            command.ExecuteNonQuery();
+
+            // Check for missing columns (migration)
+            var columns = new List<string>();
+            var checkCmd = connection.CreateCommand();
+            checkCmd.CommandText = "PRAGMA table_info(PowerReadings);";
+            using (var reader = checkCmd.ExecuteReader())
+            {
+                while (reader.Read()) columns.Add(reader["name"].ToString() ?? "");
+            }
+
+            string[] required = { "CpuUsage", "GpuUsage", "RamUsageGb", "NetUp", "NetDown" };
+            foreach (var col in required)
+            {
+                if (!columns.Contains(col))
+                {
+                    var alterCmd = connection.CreateCommand();
+                    alterCmd.CommandText = $"ALTER TABLE PowerReadings ADD COLUMN {col} REAL NOT NULL DEFAULT 0;";
+                    try { alterCmd.ExecuteNonQuery(); } catch { }
+                }
+            }
         }
 
         public static void LogReading(HardwareStats stats)
         {
             try
             {
-                using var db = new AppDbContext();
-                db.PowerReadings.Add(new PowerReading
-                {
-                    PowerWatts = stats.PowerWatts,
-                    CpuTemp = stats.CpuTemp,
-                    GpuTemp = stats.GpuTemp,
-                    CpuUsage = stats.CpuUsage,
-                    GpuUsage = stats.GpuUsage,
-                    RamUsageGb = stats.RamUsedGb,
-                    NetUp = stats.NetUp,
-                    NetDown = stats.NetDown
-                });
-                db.SaveChanges();
+                using var connection = new SqliteConnection(GetConnectionString());
+                connection.Open();
+                var command = connection.CreateCommand();
+                command.CommandText = 
+                @"
+                    INSERT INTO PowerReadings (Timestamp, PowerWatts, CpuTemp, GpuTemp, CpuUsage, GpuUsage, RamUsageGb, NetUp, NetDown)
+                    VALUES ($ts, $power, $ctemp, $gtemp, $cusage, $gusage, $ram, $nup, $ndown)
+                ";
+                command.Parameters.AddWithValue("$ts", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+                command.Parameters.AddWithValue("$power", stats.PowerWatts);
+                command.Parameters.AddWithValue("$ctemp", stats.CpuTemp);
+                command.Parameters.AddWithValue("$gtemp", stats.GpuTemp);
+                command.Parameters.AddWithValue("$cusage", stats.CpuUsage);
+                command.Parameters.AddWithValue("$gusage", stats.GpuUsage);
+                command.Parameters.AddWithValue("$ram", stats.RamUsedGb);
+                command.Parameters.AddWithValue("$nup", stats.NetUp);
+                command.Parameters.AddWithValue("$ndown", stats.NetDown);
+                command.ExecuteNonQuery();
             }
-            catch { /* silently ignore */ }
+            catch { }
         }
 
         public static (int count, double avg, double max, double min, double kwh, double hours)
-            GetStats(int hours)
+            GetStats(int hoursLimit)
         {
-            using var db = new AppDbContext();
-            var since = DateTime.Now.AddHours(-hours);
-            var readings = db.PowerReadings.Where(r => r.Timestamp > since).ToList();
+            try
+            {
+                using var connection = new SqliteConnection(GetConnectionString());
+                connection.Open();
+                var since = DateTime.Now.AddHours(-hoursLimit).ToString("yyyy-MM-dd HH:mm:ss");
 
-            if (readings.Count == 0)
-                return (0, 0, 0, 0, 0, 0);
+                var command = connection.CreateCommand();
+                command.CommandText = 
+                @"
+                    SELECT COUNT(*), AVG(PowerWatts), MAX(PowerWatts), MIN(PowerWatts)
+                    FROM PowerReadings WHERE Timestamp > $since
+                ";
+                command.Parameters.AddWithValue("$since", since);
 
-            double avg = readings.Average(r => r.PowerWatts);
-            double max = readings.Max(r => r.PowerWatts);
-            double min = readings.Min(r => r.PowerWatts);
-            double hoursOfData = readings.Count / 60.0;
-            double kwh = (avg * hoursOfData) / 1000.0;
-
-            return (readings.Count, avg, max, min, kwh, hoursOfData);
+                using var reader = command.ExecuteReader();
+                if (reader.Read() && !reader.IsDBNull(0))
+                {
+                    int count = reader.GetInt32(0);
+                    double avg = reader.GetDouble(1);
+                    double max = reader.GetDouble(2);
+                    double min = reader.GetDouble(3);
+                    double hoursOfData = count / 60.0;
+                    double kwh = (avg * hoursOfData) / 1000.0;
+                    return (count, avg, max, min, kwh, hoursOfData);
+                }
+            }
+            catch { }
+            return (0, 0, 0, 0, 0, 0);
         }
 
-        public static List<(string label, double power, double cpuTemp, double gpuTemp, double cpuUsage, double gpuUsage, double ramGb, double net)> GetHourlyAverage(int hours)
+        public static List<(string label, double power, double cpuTemp, double gpuTemp, double cpuUsage, double gpuUsage, double ramGb, double net)> GetHourlyAverage(int hoursLimit)
         {
-            using var db = new AppDbContext();
-            var since = DateTime.Now.AddHours(-hours);
-            return db.PowerReadings
-                .Where(r => r.Timestamp > since)
-                .AsEnumerable()
-                .GroupBy(r => r.Timestamp.ToString("HH") + "h")
-                .Select(g => (
-                    g.Key, 
-                    g.Average(r => r.PowerWatts),
-                    g.Average(r => r.CpuTemp),
-                    g.Average(r => r.GpuTemp),
-                    g.Average(r => r.CpuUsage),
-                    g.Average(r => r.GpuUsage),
-                    g.Average(r => r.RamUsageGb),
-                    g.Average(r => r.NetUp + r.NetDown)
-                ))
-                .OrderBy(x => x.Item1)
-                .ToList();
+            var result = new List<(string, double, double, double, double, double, double, double)>();
+            try
+            {
+                using var connection = new SqliteConnection(GetConnectionString());
+                connection.Open();
+                var since = DateTime.Now.AddHours(-hoursLimit).ToString("yyyy-MM-dd HH:mm:ss");
+
+                var command = connection.CreateCommand();
+                command.CommandText = 
+                @"
+                    SELECT strftime('%H', Timestamp) || 'h' as Hour,
+                           AVG(PowerWatts), AVG(CpuTemp), AVG(GpuTemp), 
+                           AVG(CpuUsage), AVG(GpuUsage), AVG(RamUsageGb), AVG(NetUp + NetDown)
+                    FROM PowerReadings 
+                    WHERE Timestamp > $since
+                    GROUP BY Hour
+                    ORDER BY Timestamp ASC
+                ";
+                command.Parameters.AddWithValue("$since", since);
+
+                using var reader = command.ExecuteReader();
+                while (reader.Read())
+                {
+                    result.Add((
+                        reader.GetString(0),
+                        reader.GetDouble(1),
+                        reader.GetDouble(2),
+                        reader.GetDouble(3),
+                        reader.GetDouble(4),
+                        reader.GetDouble(5),
+                        reader.GetDouble(6),
+                        reader.GetDouble(7)
+                    ));
+                }
+            }
+            catch { }
+            return result;
         }
     }
 
@@ -304,6 +367,7 @@ namespace SysMonBar
         protected override void OnClosed(EventArgs e)
         {
             _refreshTimer.Stop();
+            App.TrimMemory();
             base.OnClosed(e);
         }
     }
