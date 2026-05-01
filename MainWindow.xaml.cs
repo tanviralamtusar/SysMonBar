@@ -13,7 +13,7 @@ namespace SysMonBar
         private readonly HardwareMonitor _monitor;
         private readonly DispatcherTimer _updateTimer;
         private readonly DispatcherTimer _topMostTimer;
-        private AppSettings _settings = new();
+        private AppSettings _settings;
         private DateTime _lastLogTime = DateTime.Now;
 
         // Win32 API for staying above taskbar
@@ -36,6 +36,7 @@ namespace SysMonBar
 
         public MainWindow()
         {
+            _settings = AppSettings.Load();
             InitializeComponent();
 
             // Init database
@@ -200,6 +201,7 @@ namespace SysMonBar
             if (dlg.ShowDialog() == true && dlg.Saved)
             {
                 _settings = dlg.Settings;
+                _settings.Save();
             }
         }
 

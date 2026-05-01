@@ -27,6 +27,46 @@ namespace SysMonBar
         public bool RunOnStartup { get; set; } = false;
         public string DisplayMode { get; set; } = "Graph";
         public double GraphWidth { get; set; } = 36;
+
+        private static string GetSettingsFilePath()
+        {
+            var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            var dir = Path.Combine(appData, "SysMonBar");
+            if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
+            return Path.Combine(dir, "settings.json");
+        }
+
+        public static AppSettings Load()
+        {
+            try
+            {
+                var file = GetSettingsFilePath();
+                if (File.Exists(file))
+                {
+                    var json = File.ReadAllText(file);
+                    return JsonSerializer.Deserialize<AppSettings>(json) ?? new AppSettings();
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Failed to load settings: {ex.Message}");
+            }
+            return new AppSettings();
+        }
+
+        public void Save()
+        {
+            try
+            {
+                var file = GetSettingsFilePath();
+                var json = JsonSerializer.Serialize(this, new JsonSerializerOptions { WriteIndented = true });
+                File.WriteAllText(file, json);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Failed to save settings: {ex.Message}");
+            }
+        }
     }
 
     public class ColorOption
