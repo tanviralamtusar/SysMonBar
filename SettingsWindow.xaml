@@ -1,7 +1,7 @@
 <Window x:Class="SysMonBar.SettingsWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Settings" Width="420" Height="700"
+        Title="Settings" Width="800" Height="550"
         WindowStartupLocation="CenterScreen"
         Background="#F9FAFB"
         FontFamily="Segoe UI"
@@ -140,9 +140,15 @@
         </Grid.RowDefinitions>
 
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-            <StackPanel Margin="0,10,0,20">
+            <Grid Margin="0,10,0,20">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
                 
-                <TextBlock Text="MODULES" Style="{StaticResource SectionHeader}"/>
+                <!-- Left Column -->
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="MODULES" Style="{StaticResource SectionHeader}"/>
                 
                 <Border Style="{StaticResource Card}">
                     <StackPanel>
@@ -232,17 +238,18 @@
 
                             <Border Grid.Row="1" Style="{StaticResource SegmentContainer}" Margin="0,12,0,0" HorizontalAlignment="Left">
                                 <StackPanel Orientation="Horizontal">
-                                    <RadioButton x:Name="rbNetKbps" Content="kbps" GroupName="NetUnit" Style="{StaticResource SegmentStyle}" MinWidth="50"/>
-                                    <RadioButton x:Name="rbNetMbps" Content="Mbps" GroupName="NetUnit" Style="{StaticResource SegmentStyle}" MinWidth="50"/>
-                                    <RadioButton x:Name="rbNetKBs" Content="KB/s" GroupName="NetUnit" Style="{StaticResource SegmentStyle}" MinWidth="50"/>
-                                    <RadioButton x:Name="rbNetMBs" Content="MB/s" GroupName="NetUnit" Style="{StaticResource SegmentStyle}" MinWidth="50"/>
+                                    <RadioButton x:Name="rbNetBits" Content="bit/s" GroupName="NetUnit" Style="{StaticResource SegmentStyle}" MinWidth="60"/>
+                                    <RadioButton x:Name="rbNetBytes" Content="byte/s" GroupName="NetUnit" Style="{StaticResource SegmentStyle}" MinWidth="60"/>
                                 </StackPanel>
                             </Border>
                         </Grid>
                     </StackPanel>
                 </Border>
+                </StackPanel>
 
-                <TextBlock Text="GENERAL" Style="{StaticResource SectionHeader}"/>
+                <!-- Right Column -->
+                <StackPanel Grid.Column="1">
+                    <TextBlock Text="GENERAL" Style="{StaticResource SectionHeader}"/>
                 
                 <Border Style="{StaticResource Card}">
                     <StackPanel>
@@ -298,7 +305,8 @@
                         </StackPanel>
                     </StackPanel>
                 </Border>
-            </StackPanel>
+                </StackPanel>
+            </Grid>
         </ScrollViewer>
 
         <!-- Footer -->
