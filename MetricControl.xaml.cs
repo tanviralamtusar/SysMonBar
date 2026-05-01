@@ -82,7 +82,7 @@ namespace SysMonBar
         {
             var ctrl = (MetricControl)d;
             ctrl.BarRect.Fill = (Brush)e.NewValue;
-            ctrl.TextDisplay.Foreground = (Brush)e.NewValue;
+            ctrl.RefreshText();
         }
 
         private static void OnValueChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -94,7 +94,40 @@ namespace SysMonBar
         private static void OnTextValueChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var ctrl = (MetricControl)d;
-            ctrl.TextDisplay.Text = (string)e.NewValue;
+            ctrl.RefreshText();
+        }
+
+        private void RefreshText()
+        {
+            if (TextDisplay == null || string.IsNullOrEmpty(TextValue)) return;
+
+            TextDisplay.Inlines.Clear();
+            
+            if (TextValue.Contains("↑") && TextValue.Contains("↓"))
+            {
+                var lines = TextValue.Split('\n');
+                foreach (var line in lines)
+                {
+                    if (line.StartsWith("↑ "))
+                    {
+                        TextDisplay.Inlines.Add(new System.Windows.Documents.Run("↑ ") { Foreground = Brushes.Tomato });
+                        TextDisplay.Inlines.Add(new System.Windows.Documents.Run(line.Substring(2) + "\n") { Foreground = Color });
+                    }
+                    else if (line.StartsWith("↓ "))
+                    {
+                        TextDisplay.Inlines.Add(new System.Windows.Documents.Run("↓ ") { Foreground = Brushes.Tomato });
+                        TextDisplay.Inlines.Add(new System.Windows.Documents.Run(line.Substring(2)) { Foreground = Color });
+                    }
+                    else
+                    {
+                        TextDisplay.Inlines.Add(new System.Windows.Documents.Run(line + "\n") { Foreground = Color });
+                    }
+                }
+            }
+            else
+            {
+                TextDisplay.Inlines.Add(new System.Windows.Documents.Run(TextValue) { Foreground = Color });
+            }
         }
 
         private static void OnModeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
