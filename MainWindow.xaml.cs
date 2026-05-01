@@ -135,6 +135,7 @@ namespace SysMonBar
                 CpuMetric.GraphWidth = _settings.GraphWidth;
                 CpuMetric.Color = GetBrush(_settings.CpuColor);
                 CpuMetric.DisplayMode = _settings.DisplayMode;
+                CpuMetric.TextValue = $"{stats.CpuUsage:F0}%";
                 CpuMetric.ToolTip = $"CPU: {stats.CpuUsage:F0}%";
 
                 // RAM
@@ -146,9 +147,15 @@ namespace SysMonBar
                 RamMetric.Color = GetBrush(_settings.RamColor);
                 RamMetric.DisplayMode = _settings.DisplayMode;
                 if (_settings.RamUnit == "MB")
+                {
                     RamMetric.ToolTip = $"RAM: {stats.RamUsedGb * 1024:F0}/{stats.RamTotalGb * 1024:F0} MB";
+                    RamMetric.TextValue = $"{stats.RamUsedGb * 1024:F0}M";
+                }
                 else
+                {
                     RamMetric.ToolTip = $"RAM: {stats.RamUsedGb:F1}/{stats.RamTotalGb:F1} GB";
+                    RamMetric.TextValue = $"{stats.RamUsedGb:F1}G";
+                }
 
                 // GPU
                 if (_settings.ShowGpu) { GpuMetric.Visibility = Visibility.Visible; }
@@ -157,6 +164,7 @@ namespace SysMonBar
                 GpuMetric.GraphWidth = _settings.GraphWidth;
                 GpuMetric.Color = GetBrush(_settings.GpuColor);
                 GpuMetric.DisplayMode = _settings.DisplayMode;
+                GpuMetric.TextValue = $"{stats.GpuUsage:F0}%";
                 GpuMetric.ToolTip = $"GPU: {stats.GpuUsage:F0}%";
 
                 // Network
@@ -169,6 +177,7 @@ namespace SysMonBar
                 NetMetric.GraphWidth = _settings.GraphWidth;
                 NetMetric.Color = GetBrush(_settings.NetColor);
                 NetMetric.DisplayMode = _settings.DisplayMode;
+                NetMetric.TextValue = $"↑ {FormatNet(netUp, _settings.NetUnit)}\n↓ {FormatNet(netDown, _settings.NetUnit)}";
                 string netText = FormatNet(netDown, _settings.NetUnit) + " / " + FormatNet(netUp, _settings.NetUnit);
                 NetMetric.ToolTip = $"↓{FormatNet(netDown, _settings.NetUnit)}  ↑{FormatNet(netUp, _settings.NetUnit)}";
 
@@ -205,7 +214,18 @@ namespace SysMonBar
                 "mbps" => $"{bytesPerSec * 8 / 1024 / 1024:F2} Mbps",
                 "KB/s" => $"{bytesPerSec / 1024:F1} KB/s",
                 "MB/s" => $"{bytesPerSec / 1024 / 1024:F2} MB/s",
-                _ => $"{bytesPerSec * 8 / 1024:F1} kbps"
+                _ => $"{bytesPerSec * 8 / 1024:F1} Kbps"
+            };
+        }
+
+        private string FormatNetShort(double bytesPerSec, string unit)
+        {
+            return unit switch
+            {
+                "mbps" => $"{bytesPerSec * 8 / 1024 / 1024:F0}M",
+                "KB/s" => $"{bytesPerSec / 1024:F0}K",
+                "MB/s" => $"{bytesPerSec / 1024 / 1024:F1}M",
+                _ => $"{bytesPerSec * 8 / 1024:F0}k"
             };
         }
 
