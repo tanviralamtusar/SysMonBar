@@ -28,6 +28,10 @@ namespace SysMonBar
         public string DisplayMode { get; set; } = "Graph";
         public double GraphWidth { get; set; } = 36;
 
+        public bool LockPosition { get; set; } = false;
+        public double? WindowLeft { get; set; }
+        public double? WindowTop { get; set; }
+
         private static string GetSettingsFilePath()
         {
             var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
@@ -112,6 +116,7 @@ namespace SysMonBar
             chkPower.IsChecked = Settings.ShowPower;
             chkTemp.IsChecked = Settings.ShowTemp;
             chkStartup.IsChecked = Settings.RunOnStartup;
+            chkLockPosition.IsChecked = Settings.LockPosition;
 
             cbCpuColor.SelectedValue = Settings.CpuColor;
             cbRamColor.SelectedValue = Settings.RamColor;
@@ -144,6 +149,7 @@ namespace SysMonBar
             Settings.ShowPower = chkPower.IsChecked ?? true;
             Settings.ShowTemp = chkTemp.IsChecked ?? true;
             Settings.RunOnStartup = chkStartup.IsChecked ?? false;
+            Settings.LockPosition = chkLockPosition.IsChecked ?? false;
 
             if (cbCpuColor.SelectedValue != null) Settings.CpuColor = cbCpuColor.SelectedValue.ToString()!;
             if (cbRamColor.SelectedValue != null) Settings.RamColor = cbRamColor.SelectedValue.ToString()!;

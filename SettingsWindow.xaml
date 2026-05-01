@@ -254,6 +254,14 @@
 
                         <Separator/>
                         
+                        <!-- Lock Position -->
+                        <Grid>
+                            <TextBlock Text="Lock Window Position" Style="{StaticResource PropertyLabel}"/>
+                            <CheckBox x:Name="chkLockPosition" Style="{StaticResource SwitchStyle}" HorizontalAlignment="Right"/>
+                        </Grid>
+
+                        <Separator/>
+                        
                         <!-- Display Mode -->
                         <Grid>
                             <Grid.RowDefinitions>

@@ -72,9 +72,17 @@ namespace SysMonBar
 
         private void UpdatePosition()
         {
-            var workArea = SystemParameters.WorkArea;
-            Left = workArea.Right - ActualWidth - 300;
-            Top = workArea.Bottom - ActualHeight;
+            if (_settings.WindowLeft.HasValue && _settings.WindowTop.HasValue)
+            {
+                Left = _settings.WindowLeft.Value;
+                Top = _settings.WindowTop.Value;
+            }
+            else
+            {
+                var workArea = SystemParameters.WorkArea;
+                Left = workArea.Right - ActualWidth - 300;
+                Top = workArea.Bottom - ActualHeight;
+            }
         }
 
         private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -105,7 +113,13 @@ namespace SysMonBar
 
         private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            DragMove();
+            if (!_settings.LockPosition)
+            {
+                DragMove();
+                _settings.WindowLeft = this.Left;
+                _settings.WindowTop = this.Top;
+                _settings.Save();
+            }
         }
 
         private void Timer_Tick(object? sender, EventArgs e)
