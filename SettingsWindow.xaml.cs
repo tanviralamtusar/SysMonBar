@@ -1,5 +1,8 @@
 using System;
+using System.IO;
+using System.Text.Json;
 using System.Windows;
+using Microsoft.Web.WebView2.Core;
 using Microsoft.Win32;
 
 namespace SysMonBar
@@ -27,24 +30,73 @@ namespace SysMonBar
         {
             InitializeComponent();
             Settings = current;
-            LoadSettings();
+            Settings.RunOnStartup = CheckStartupStatus();
+            InitializeAsync();
         }
 
-        private void LoadSettings()
+        async void InitializeAsync()
         {
-            ChkCpu.IsChecked = Settings.ShowCpu;
-            ChkRam.IsChecked = Settings.ShowRam;
-            ChkGpu.IsChecked = Settings.ShowGpu;
-            ChkNet.IsChecked = Settings.ShowNet;
-            ChkPower.IsChecked = Settings.ShowPower;
-            ChkTemp.IsChecked = Settings.ShowTemp;
-            ChkStartup.IsChecked = CheckStartupStatus();
+            await SettingsWebView.EnsureCoreWebView2Async(null);
+            
+            SettingsWebView.CoreWebView2.WebMessageReceived += CoreWebView2_WebMessageReceived;
+            
+            string htmlPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "SettingsWindow.html");
+            if (File.Exists(htmlPath))
+            {
+                SettingsWebView.Source = new Uri(htmlPath);
+                SettingsWebView.NavigationCompleted += SettingsWebView_NavigationCompleted;
+            }
+            else
+            {
+                MessageBox.Show("SettingsWindow.html not found in " + htmlPath, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
 
-            // Set combo selections
-            foreach (System.Windows.Controls.ComboBoxItem item in CmbUnit.Items)
-                if (item.Content.ToString() == Settings.RamUnit) { CmbUnit.SelectedItem = item; break; }
-            foreach (System.Windows.Controls.ComboBoxItem item in CmbNetUnit.Items)
-                if (item.Content.ToString() == Settings.NetUnit) { CmbNetUnit.SelectedItem = item; break; }
+        private void SettingsWebView_NavigationCompleted(object sender, CoreWebView2NavigationCompletedEventArgs e)
+        {
+            if (e.IsSuccess)
+            {
+                var options = new JsonSerializerOptions { PropertyNamingPolicy = null };
+                string json = JsonSerializer.Serialize(Settings, options);
+                // The JS function loadSettings parses the string. Since ExecuteScriptAsync expects a JS string literal,
+                // we should serialize it, then escape it properly or just pass it to a JS function.
+                // An easier way is to just call `loadSettings('${json.Replace("'", "\\'")}')`.
+                string script = $"loadSettings('{json.Replace("'", "\\'").Replace("\\", "\\\\")}');";
+                SettingsWebView.ExecuteScriptAsync(script);
+            }
+        }
+
+        private void CoreWebView2_WebMessageReceived(object sender, CoreWebView2WebMessageReceivedEventArgs e)
+        {
+            try
+            {
+                string message = e.TryGetWebMessageAsString();
+                using var doc = JsonDocument.Parse(message);
+                var root = doc.RootElement;
+                
+                string action = root.GetProperty("action").GetString();
+                if (action == "CANCEL")
+                {
+                    DialogResult = false;
+                    Close();
+                }
+                else if (action == "SAVE")
+                {
+                    var payload = root.GetProperty("payload");
+                    var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                    Settings = JsonSerializer.Deserialize<AppSettings>(payload.GetRawText(), options);
+                    
+                    ToggleStartup(Settings.RunOnStartup);
+
+                    Saved = true;
+                    DialogResult = true;
+                    Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Failed to parse message: {ex.Message}");
+            }
         }
 
         private bool CheckStartupStatus()
@@ -81,34 +133,6 @@ namespace SysMonBar
             {
                 System.Diagnostics.Debug.WriteLine($"Startup toggle error: {ex.Message}");
             }
-        }
-
-        private void Save_Click(object sender, RoutedEventArgs e)
-        {
-            Settings.ShowCpu = ChkCpu.IsChecked == true;
-            Settings.ShowRam = ChkRam.IsChecked == true;
-            Settings.ShowGpu = ChkGpu.IsChecked == true;
-            Settings.ShowNet = ChkNet.IsChecked == true;
-            Settings.ShowPower = ChkPower.IsChecked == true;
-            Settings.ShowTemp = ChkTemp.IsChecked == true;
-
-            var unitItem = CmbUnit.SelectedItem as System.Windows.Controls.ComboBoxItem;
-            Settings.RamUnit = unitItem?.Content.ToString() ?? "GB";
-
-            var netItem = CmbNetUnit.SelectedItem as System.Windows.Controls.ComboBoxItem;
-            Settings.NetUnit = netItem?.Content.ToString() ?? "kbps";
-
-            ToggleStartup(ChkStartup.IsChecked == true);
-
-            Saved = true;
-            DialogResult = true;
-            Close();
-        }
-
-        private void Cancel_Click(object sender, RoutedEventArgs e)
-        {
-            DialogResult = false;
-            Close();
         }
     }
 }

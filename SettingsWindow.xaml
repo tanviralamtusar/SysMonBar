@@ -1,70 +1,11 @@
 <Window x:Class="SysMonBar.SettingsWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="SysMonBar Settings" Width="380" Height="420"
-        WindowStartupLocation="CenterScreen" ResizeMode="NoResize"
-        Background="#2b2b2b">
-    <Window.Resources>
-        <Style TargetType="CheckBox">
-            <Setter Property="Foreground" Value="#ddd"/>
-            <Setter Property="Margin" Value="0,4"/>
-        </Style>
-        <Style TargetType="Label">
-            <Setter Property="Foreground" Value="#ddd"/>
-        </Style>
-        <Style TargetType="ComboBox">
-            <Setter Property="Background" Value="#333"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="Margin" Value="0,2"/>
-        </Style>
-        <Style TargetType="Button">
-            <Setter Property="Background" Value="#3498db"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="Padding" Value="16,8"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Margin" Value="4"/>
-        </Style>
-    </Window.Resources>
-
-    <StackPanel Margin="16">
-        <Label Content="Modules" FontSize="14" FontWeight="Bold" Foreground="White"/>
-        <Border Background="#333" CornerRadius="6" Padding="12" Margin="0,4,0,12">
-            <StackPanel>
-                <CheckBox x:Name="ChkCpu" Content="🖥️  CPU Usage" IsChecked="True"/>
-                <CheckBox x:Name="ChkRam" Content="💾  RAM Usage" IsChecked="True"/>
-                <CheckBox x:Name="ChkGpu" Content="🎮  GPU Usage" IsChecked="True"/>
-                <CheckBox x:Name="ChkNet" Content="🌐  Network" IsChecked="True"/>
-                <CheckBox x:Name="ChkPower" Content="⚡  Power (Watts)" IsChecked="True"/>
-                <CheckBox x:Name="ChkTemp" Content="🌡️  Temperature" IsChecked="True"/>
-            </StackPanel>
-        </Border>
-
-        <Label Content="General" FontSize="14" FontWeight="Bold" Foreground="White"/>
-        <Border Background="#333" CornerRadius="6" Padding="12" Margin="0,4,0,12">
-            <StackPanel>
-                <StackPanel Orientation="Horizontal" Margin="0,2">
-                    <Label Content="RAM Unit:" Width="100"/>
-                    <ComboBox x:Name="CmbUnit" Width="100">
-                        <ComboBoxItem Content="GB" IsSelected="True"/>
-                        <ComboBoxItem Content="MB"/>
-                    </ComboBox>
-                </StackPanel>
-                <StackPanel Orientation="Horizontal" Margin="0,2">
-                    <Label Content="Network Unit:" Width="100"/>
-                    <ComboBox x:Name="CmbNetUnit" Width="100">
-                        <ComboBoxItem Content="kbps" IsSelected="True"/>
-                        <ComboBoxItem Content="mbps"/>
-                        <ComboBoxItem Content="KB/s"/>
-                        <ComboBoxItem Content="MB/s"/>
-                    </ComboBox>
-                </StackPanel>
-                <CheckBox x:Name="ChkStartup" Content="Run on Startup" Margin="0,8,0,0"/>
-            </StackPanel>
-        </Border>
-
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Content="Save &amp; Apply" Click="Save_Click"/>
-            <Button Content="Cancel" Click="Cancel_Click" Background="#555"/>
-        </StackPanel>
-    </StackPanel>
+        xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
+        Title="SysMonBar Settings" Width="400" Height="600"
+        WindowStartupLocation="CenterScreen"
+        Background="#f5f5f7">
+    <Grid>
+        <wv2:WebView2 x:Name="SettingsWebView" />
+    </Grid>
 </Window>
