@@ -208,6 +208,9 @@ namespace SysMonBar
                 {
                     _computer.Accept(new UpdateVisitor());
 
+                    // Track CPU temp priority: higher = better source
+                    int cpuTempPriority = 0;
+
                     void ProcessHardware(IHardware hw)
                     {
                         foreach (ISensor sensor in hw.Sensors)
@@ -216,10 +219,51 @@ namespace SysMonBar
 
                             if (hw.HardwareType == HardwareType.Cpu)
                             {
-                                if (sensor.SensorType == SensorType.Load && sensor.Name == "CPU Total") stats.CpuUsage = sensor.Value.Value;
-                                else if (sensor.SensorType == SensorType.Temperature && sensor.Name.Contains("Core Average")) stats.CpuTemp = sensor.Value.Value;
-                                else if (sensor.SensorType == SensorType.Temperature && sensor.Name.Contains("Package")) stats.CpuTemp = sensor.Value.Value;
-                                else if (sensor.SensorType == SensorType.Power && sensor.Name.Contains("Package")) stats.PowerWatts += sensor.Value.Value;
+                                if (sensor.SensorType == SensorType.Load && sensor.Name == "CPU Total")
+                                {
+                                    stats.CpuUsage = sensor.Value.Value;
+                                }
+                                else if (sensor.SensorType == SensorType.Temperature)
+                                {
+                                    // Priority-based CPU temperature selection:
+                                    // 10 = Intel "Core Average" / AMD Ryzen "CCDs Average (Tdie)"
+                                    //  9 = Intel "CPU Package"
+                                    //  8 = AMD Ryzen "Core (Tctl/Tdie)" (combined, most common on Zen2+)
+                                    //  7 = AMD Ryzen "Core (Tdie)" (die temp without offset)
+                                    //  6 = AMD Ryzen "Core (Tctl)" (may include offset on 1000-series)
+                                    //  5 = AMD 10h "CPU Cores"
+                                    //  4 = Intel "Core Max" / AMD Ryzen "CCDs Max (Tdie)"
+                                    //  3 = Any individual core (Core #N, P-Core, E-Core)
+                                    string name = sensor.Name;
+                                    int priority = 0;
+
+                                    if (name == "Core Average" || name == "CCDs Average (Tdie)")
+                                        priority = 10;
+                                    else if (name == "CPU Package")
+                                        priority = 9;
+                                    else if (name == "Core (Tctl/Tdie)")
+                                        priority = 8;
+                                    else if (name == "Core (Tdie)")
+                                        priority = 7;
+                                    else if (name == "Core (Tctl)")
+                                        priority = 6;
+                                    else if (name == "CPU Cores")
+                                        priority = 5;
+                                    else if (name == "Core Max" || name == "CCDs Max (Tdie)")
+                                        priority = 4;
+                                    else if (name.StartsWith("Core #") || name.StartsWith("P-Core") || name.StartsWith("E-Core"))
+                                        priority = 3;
+
+                                    if (priority > cpuTempPriority && sensor.Value.Value > 0 && sensor.Value.Value < 150)
+                                    {
+                                        stats.CpuTemp = sensor.Value.Value;
+                                        cpuTempPriority = priority;
+                                    }
+                                }
+                                else if (sensor.SensorType == SensorType.Power && sensor.Name.Contains("Package"))
+                                {
+                                    stats.PowerWatts += sensor.Value.Value;
+                                }
                             }
                             else if (hw.HardwareType == HardwareType.GpuNvidia || hw.HardwareType == HardwareType.GpuAmd || hw.HardwareType == HardwareType.GpuIntel)
                             {
