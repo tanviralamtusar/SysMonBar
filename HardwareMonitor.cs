@@ -22,6 +22,22 @@ namespace SysMonBar
         public double NetDown { get; set; }
     }
 
+    public class UpdateVisitor : IVisitor
+    {
+        public void VisitComputer(IComputer computer) => computer.Traverse(this);
+
+        public void VisitHardware(IHardware hardware)
+        {
+            hardware.Update();
+            foreach (IHardware subHardware in hardware.SubHardware)
+                subHardware.Accept(this);
+        }
+
+        public void VisitSensor(ISensor sensor) { }
+
+        public void VisitParameter(IParameter parameter) { }
+    }
+
     public class HardwareMonitor : IDisposable
     {
         // Legacy counters
@@ -190,36 +206,48 @@ namespace SysMonBar
             {
                 try
                 {
-                    foreach (IHardware hardware in _computer.Hardware)
+                    _computer.Accept(new UpdateVisitor());
+
+                    void ProcessHardware(IHardware hw)
                     {
-                        hardware.Update();
-                        foreach (ISensor sensor in hardware.Sensors)
+                        foreach (ISensor sensor in hw.Sensors)
                         {
                             if (sensor.Value == null) continue;
 
-                            if (hardware.HardwareType == HardwareType.Cpu)
+                            if (hw.HardwareType == HardwareType.Cpu)
                             {
                                 if (sensor.SensorType == SensorType.Load && sensor.Name == "CPU Total") stats.CpuUsage = sensor.Value.Value;
+                                else if (sensor.SensorType == SensorType.Temperature && sensor.Name.Contains("Core Average")) stats.CpuTemp = sensor.Value.Value;
                                 else if (sensor.SensorType == SensorType.Temperature && sensor.Name.Contains("Package")) stats.CpuTemp = sensor.Value.Value;
                                 else if (sensor.SensorType == SensorType.Power && sensor.Name.Contains("Package")) stats.PowerWatts += sensor.Value.Value;
                             }
-                            else if (hardware.HardwareType == HardwareType.GpuNvidia || hardware.HardwareType == HardwareType.GpuAmd || hardware.HardwareType == HardwareType.GpuIntel)
+                            else if (hw.HardwareType == HardwareType.GpuNvidia || hw.HardwareType == HardwareType.GpuAmd || hw.HardwareType == HardwareType.GpuIntel)
                             {
                                 if (sensor.SensorType == SensorType.Load && sensor.Name.Contains("Core")) stats.GpuUsage = sensor.Value.Value;
                                 else if (sensor.SensorType == SensorType.Temperature && sensor.Name.Contains("Core")) stats.GpuTemp = sensor.Value.Value;
                                 else if (sensor.SensorType == SensorType.Power && sensor.Name.Contains("GPU Package")) stats.PowerWatts += sensor.Value.Value;
                             }
-                            else if (hardware.HardwareType == HardwareType.Memory)
+                            else if (hw.HardwareType == HardwareType.Memory)
                             {
                                 if (sensor.SensorType == SensorType.Data && sensor.Name == "Memory Used") stats.RamUsedGb = sensor.Value.Value;
-                                else if (sensor.SensorType == SensorType.Data && sensor.Name == "Memory") stats.RamTotalGb = sensor.Value.Value + (sensor.Name.Contains("Available") ? sensor.Value.Value : 0); // Simplified
+                                else if (sensor.SensorType == SensorType.Data && sensor.Name == "Memory") stats.RamTotalGb = sensor.Value.Value + (sensor.Name.Contains("Available") ? sensor.Value.Value : 0);
                             }
-                            else if (hardware.HardwareType == HardwareType.Network)
+                            else if (hw.HardwareType == HardwareType.Network)
                             {
                                 if (sensor.SensorType == SensorType.Throughput && sensor.Name.Contains("Upload")) stats.NetUp += sensor.Value.Value;
                                 else if (sensor.SensorType == SensorType.Throughput && sensor.Name.Contains("Download")) stats.NetDown += sensor.Value.Value;
                             }
                         }
+
+                        foreach (IHardware subHardware in hw.SubHardware)
+                        {
+                            ProcessHardware(subHardware);
+                        }
+                    }
+
+                    foreach (IHardware hardware in _computer.Hardware)
+                    {
+                        ProcessHardware(hardware);
                     }
                     lhmSuccess = true;
                 }
