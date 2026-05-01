@@ -177,7 +177,7 @@ namespace SysMonBar
                 NetMetric.GraphWidth = _settings.GraphWidth;
                 NetMetric.Color = GetBrush(_settings.NetColor);
                 NetMetric.DisplayMode = _settings.DisplayMode;
-                NetMetric.TextValue = $"{FormatNetShort(netDown, _settings.NetUnit)}↓";
+                NetMetric.TextValue = $"↑ {FormatNet(netUp, _settings.NetUnit)}\n↓ {FormatNet(netDown, _settings.NetUnit)}";
                 string netText = FormatNet(netDown, _settings.NetUnit) + " / " + FormatNet(netUp, _settings.NetUnit);
                 NetMetric.ToolTip = $"↓{FormatNet(netDown, _settings.NetUnit)}  ↑{FormatNet(netUp, _settings.NetUnit)}";
 
@@ -214,7 +214,7 @@ namespace SysMonBar
                 "mbps" => $"{bytesPerSec * 8 / 1024 / 1024:F2} Mbps",
                 "KB/s" => $"{bytesPerSec / 1024:F1} KB/s",
                 "MB/s" => $"{bytesPerSec / 1024 / 1024:F2} MB/s",
-                _ => $"{bytesPerSec * 8 / 1024:F1} kbps"
+                _ => $"{bytesPerSec * 8 / 1024:F1} Kbps"
             };
         }
 
