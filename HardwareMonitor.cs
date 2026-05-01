@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Management;
 using System.Threading;
+using LibreHardwareMonitor.Hardware;
 
 namespace SysMonBar
 {
@@ -23,16 +24,18 @@ namespace SysMonBar
 
     public class HardwareMonitor : IDisposable
     {
+        // Legacy counters
         private PerformanceCounter? _cpuCounter;
         private PerformanceCounter? _ramCounter;
         private float _totalRamGb;
-        
         private List<PerformanceCounter> _netDownCounters = new();
         private List<PerformanceCounter> _netUpCounters = new();
         private List<PerformanceCounter> _gpuCounters = new();
-
         private DateTime _lastCounterUpdate = DateTime.MinValue;
 
+        // LibreHardwareMonitor
+        private Computer? _computer;
+        
         // Background WMI fields
         private float _lastCpuTemp;
         private float _lastGpuTemp;
@@ -41,6 +44,7 @@ namespace SysMonBar
 
         public HardwareMonitor()
         {
+            // Initialize Legacy
             try { _cpuCounter = new PerformanceCounter("Processor Information", "% Processor Time", "_Total"); } catch { }
             try { _ramCounter = new PerformanceCounter("Memory", "Available MBytes"); } catch { }
 
@@ -56,11 +60,29 @@ namespace SysMonBar
                     }
                 }
             }
-            catch { _totalRamGb = 16f; } // Fallback
+            catch { _totalRamGb = 16f; }
 
             UpdateDynamicCounters();
 
-            // Start background thread for WMI to avoid freezing UI
+            // Initialize LibreHardwareMonitor
+            try
+            {
+                _computer = new Computer
+                {
+                    IsCpuEnabled = true,
+                    IsGpuEnabled = true,
+                    IsMemoryEnabled = true,
+                    IsNetworkEnabled = true,
+                    IsMotherboardEnabled = true
+                };
+                _computer.Open();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"LibreHardwareMonitor failed to initialize: {ex.Message}");
+            }
+
+            // Start background thread for WMI fallback
             _wmiThread = new Thread(WmiLoop)
             {
                 IsBackground = true,
@@ -89,12 +111,11 @@ namespace SysMonBar
                     if (maxTemp > 0)
                     {
                         _lastCpuTemp = maxTemp;
-                        _lastGpuTemp = maxTemp; // Usually APUs share temp
+                        _lastGpuTemp = maxTemp;
                     }
                 }
                 catch { }
 
-                // Wait before next poll
                 for (int i = 0; i < 20 && !_isDisposed; i++)
                 {
                     Thread.Sleep(100);
@@ -109,7 +130,6 @@ namespace SysMonBar
 
             _lastCounterUpdate = DateTime.Now;
 
-            // Update Network Counters
             try
             {
                 var netCategory = new PerformanceCounterCategory("Network Interface");
@@ -133,7 +153,6 @@ namespace SysMonBar
             }
             catch { }
 
-            // Update GPU Counters
             try
             {
                 var gpuCategory = new PerformanceCounterCategory("GPU Engine");
@@ -164,45 +183,95 @@ namespace SysMonBar
         public HardwareStats GetStats()
         {
             UpdateDynamicCounters();
-
             var stats = new HardwareStats { RamTotalGb = _totalRamGb };
 
-            // CPU
-            try { if (_cpuCounter != null) stats.CpuUsage = _cpuCounter.NextValue(); } catch { }
-
-            // RAM
-            try 
-            { 
-                if (_ramCounter != null) 
+            bool lhmSuccess = false;
+            if (_computer != null)
+            {
+                try
                 {
-                    float availMb = _ramCounter.NextValue();
-                    float availGb = availMb / 1024f;
-                    stats.RamUsedGb = Math.Max(0, _totalRamGb - availGb);
+                    foreach (IHardware hardware in _computer.Hardware)
+                    {
+                        hardware.Update();
+                        foreach (ISensor sensor in hardware.Sensors)
+                        {
+                            if (sensor.Value == null) continue;
+
+                            if (hardware.HardwareType == HardwareType.Cpu)
+                            {
+                                if (sensor.SensorType == SensorType.Load && sensor.Name == "CPU Total") stats.CpuUsage = sensor.Value.Value;
+                                else if (sensor.SensorType == SensorType.Temperature && sensor.Name.Contains("Package")) stats.CpuTemp = sensor.Value.Value;
+                                else if (sensor.SensorType == SensorType.Power && sensor.Name.Contains("Package")) stats.PowerWatts += sensor.Value.Value;
+                            }
+                            else if (hardware.HardwareType == HardwareType.GpuNvidia || hardware.HardwareType == HardwareType.GpuAmd || hardware.HardwareType == HardwareType.GpuIntel)
+                            {
+                                if (sensor.SensorType == SensorType.Load && sensor.Name.Contains("Core")) stats.GpuUsage = sensor.Value.Value;
+                                else if (sensor.SensorType == SensorType.Temperature && sensor.Name.Contains("Core")) stats.GpuTemp = sensor.Value.Value;
+                                else if (sensor.SensorType == SensorType.Power && sensor.Name.Contains("GPU Package")) stats.PowerWatts += sensor.Value.Value;
+                            }
+                            else if (hardware.HardwareType == HardwareType.Memory)
+                            {
+                                if (sensor.SensorType == SensorType.Data && sensor.Name == "Memory Used") stats.RamUsedGb = sensor.Value.Value;
+                                else if (sensor.SensorType == SensorType.Data && sensor.Name == "Memory") stats.RamTotalGb = sensor.Value.Value + (sensor.Name.Contains("Available") ? sensor.Value.Value : 0); // Simplified
+                            }
+                            else if (hardware.HardwareType == HardwareType.Network)
+                            {
+                                if (sensor.SensorType == SensorType.Throughput && sensor.Name.Contains("Upload")) stats.NetUp += sensor.Value.Value;
+                                else if (sensor.SensorType == SensorType.Throughput && sensor.Name.Contains("Download")) stats.NetDown += sensor.Value.Value;
+                            }
+                        }
+                    }
+                    lhmSuccess = true;
                 }
-            } 
-            catch { }
-
-            // Network
-            try
-            {
-                stats.NetDown = _netDownCounters.Sum(c => { try { return c.NextValue(); } catch { return 0; } });
-                stats.NetUp = _netUpCounters.Sum(c => { try { return c.NextValue(); } catch { return 0; } });
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"LibreHardwareMonitor update failed: {ex.Message}");
+                }
             }
-            catch { }
 
-            // GPU
-            try
+            // --- Fallbacks ---
+
+            // CPU Fallback
+            if (stats.CpuUsage <= 0 && _cpuCounter != null)
             {
-                stats.GpuUsage = _gpuCounters.Sum(c => { try { return c.NextValue(); } catch { return 0; } });
-                if (stats.GpuUsage > 100) stats.GpuUsage = 100;
+                try { stats.CpuUsage = _cpuCounter.NextValue(); } catch { }
             }
-            catch { }
 
-            // Temperature (from WMI thread)
-            stats.CpuTemp = _lastCpuTemp;
-            stats.GpuTemp = _lastGpuTemp;
+            // RAM Fallback
+            if (stats.RamUsedGb <= 0 && _ramCounter != null)
+            {
+                try 
+                { 
+                    float availMb = _ramCounter.NextValue();
+                    stats.RamUsedGb = Math.Max(0, _totalRamGb - (availMb / 1024f));
+                } catch { }
+            }
 
-            // Fallback estimation
+            // Network Fallback
+            if (stats.NetDown <= 0 && stats.NetUp <= 0)
+            {
+                try
+                {
+                    stats.NetDown = _netDownCounters.Sum(c => { try { return c.NextValue(); } catch { return 0; } });
+                    stats.NetUp = _netUpCounters.Sum(c => { try { return c.NextValue(); } catch { return 0; } });
+                } catch { }
+            }
+
+            // GPU Fallback
+            if (stats.GpuUsage <= 0)
+            {
+                try
+                {
+                    stats.GpuUsage = _gpuCounters.Sum(c => { try { return c.NextValue(); } catch { return 0; } });
+                    if (stats.GpuUsage > 100) stats.GpuUsage = 100;
+                } catch { }
+            }
+
+            // Temperature Fallback
+            if (stats.CpuTemp <= 0) stats.CpuTemp = _lastCpuTemp;
+            if (stats.GpuTemp <= 0) stats.GpuTemp = _lastGpuTemp;
+
+            // Estimation Fallback (Last resort)
             if (stats.PowerWatts < 1)
                 stats.PowerWatts = 15f + (stats.CpuUsage / 100f) * 50f + (stats.GpuUsage / 100f) * 30f;
 
@@ -218,6 +287,7 @@ namespace SysMonBar
         public void Dispose()
         {
             _isDisposed = true;
+            try { _computer?.Close(); } catch { }
             try { _cpuCounter?.Dispose(); } catch { }
             try { _ramCounter?.Dispose(); } catch { }
             DisposeCounters(_netDownCounters);
