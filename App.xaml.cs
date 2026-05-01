@@ -41,7 +41,7 @@ public partial class App : Application
     {
         _memoryTimer = new System.Windows.Threading.DispatcherTimer 
         { 
-            Interval = TimeSpan.FromMinutes(2) 
+            Interval = TimeSpan.FromMinutes(1) 
         };
         _memoryTimer.Tick += (s, e) => TrimMemory();
         _memoryTimer.Start();

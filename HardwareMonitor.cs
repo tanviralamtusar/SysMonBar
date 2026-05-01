@@ -96,8 +96,8 @@ namespace SysMonBar
                     IsCpuEnabled = true,
                     IsGpuEnabled = true,
                     IsMemoryEnabled = true,
-                    IsNetworkEnabled = true,
-                    IsMotherboardEnabled = true
+                    IsNetworkEnabled = false, // Use PerformanceCounters instead
+                    IsMotherboardEnabled = false // Very heavy, disabling for 20MB target
                 };
                 _computer.Open();
             }
@@ -141,7 +141,7 @@ namespace SysMonBar
                 }
                 catch { }
 
-                for (int i = 0; i < 20 && !_isDisposed; i++)
+                for (int i = 0; i < 50 && !_isDisposed; i++) // Increased sleep to 5s
                 {
                     Thread.Sleep(100);
                 }
