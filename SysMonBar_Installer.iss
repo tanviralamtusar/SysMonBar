@@ -12,6 +12,7 @@ DefaultGroupName=SysMonBar
 DisableProgramGroupPage=yes
 ; Application icon
 UninstallDisplayIcon={app}\SysMonBar.exe
+SetupIconFile=app_icon.ico
 OutputDir=.
 OutputBaseFilename=SysMonBar_Setup
 Compression=lzma
@@ -29,11 +30,12 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 [Files]
 ; Include all files from the publish directory
 Source: "publish\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
-; NOTE: Don't use "Flags: ignoreversion" on any shared system files
+; Include the ico file if it exists (for internal use by setup)
+Source: "app_icon.ico"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
 Name: "{autoprograms}\SysMonBar"; Filename: "{app}\SysMonBar.exe"
 Name: "{autodesktop}\SysMonBar"; Filename: "{app}\SysMonBar.exe"; Tasks: desktopicon
 
 [Run]
-Filename: "{app}\SysMonBar.exe"; Description: "{cm:LaunchProgram,SysMonBar}"; Flags: nowait postinstall skipifsilent
+Filename: "{app}\SysMonBar.exe"; Description: "{cm:LaunchProgram,SysMonBar}"; Flags: nowait postinstall skipifsilent runasadmin
