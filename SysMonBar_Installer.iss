@@ -31,11 +31,11 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 ; Include all files from the publish directory
 Source: "publish\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; Include the ico file if it exists (for internal use by setup)
-Source: "app_icon.ico"; DestDir: "{app}"; Flags: ignoreversion
+Source: "icon.ico"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
 Name: "{autoprograms}\SysMonBar"; Filename: "{app}\SysMonBar.exe"
 Name: "{autodesktop}\SysMonBar"; Filename: "{app}\SysMonBar.exe"; Tasks: desktopicon
 
 [Run]
-Filename: "{app}\SysMonBar.exe"; Description: "{cm:LaunchProgram,SysMonBar}"; Flags: nowait postinstall skipifsilent runasadmin
+Filename: "{app}\SysMonBar.exe"; Description: "{cm:LaunchProgram,SysMonBar}"; Flags: nowait postinstall skipifsilent shellexec
