@@ -12,7 +12,7 @@ DefaultGroupName=SysMonBar
 DisableProgramGroupPage=yes
 ; Application icon
 UninstallDisplayIcon={app}\SysMonBar.exe
-SetupIconFile=app_icon.ico
+SetupIconFile=icon.ico
 OutputDir=.
 OutputBaseFilename=SysMonBar_Setup
 Compression=lzma
