@@ -24,3 +24,7 @@ py_archive/
 *.log
 *.xml
 !app.manifest
+
+# Installers
+*.exe
+*.msi

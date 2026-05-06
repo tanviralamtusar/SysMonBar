@@ -74,29 +74,36 @@ public partial class App : Application
 
     private void SetupTrayIcon()
     {
-        _trayIcon = new System.Windows.Forms.NotifyIcon();
-
-        var iconPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "icon.png");
-        if (File.Exists(iconPath))
+        try
         {
-            using var bmp = new Bitmap(iconPath);
-            _trayIcon.Icon = Icon.FromHandle(bmp.GetHicon());
+            _trayIcon = new System.Windows.Forms.NotifyIcon();
+
+            var iconPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "icon.png");
+            if (File.Exists(iconPath))
+            {
+                using var bmp = new Bitmap(iconPath);
+                _trayIcon.Icon = Icon.FromHandle(bmp.GetHicon());
+            }
+            else
+            {
+                _trayIcon.Icon = SystemIcons.Application;
+            }
+
+            _trayIcon.Text = "SysMonBar";
+            _trayIcon.Visible = true;
+
+            var menu = new System.Windows.Forms.ContextMenuStrip();
+            menu.Items.Add("📊 Analytics", null, (s, ev) => GetMainWin()?.OpenAnalytics());
+            menu.Items.Add("⚙️ Settings", null, (s, ev) => GetMainWin()?.OpenSettings());
+            menu.Items.Add(new System.Windows.Forms.ToolStripSeparator());
+            menu.Items.Add("❌ Exit", null, (s, ev) => Shutdown());
+
+            _trayIcon.ContextMenuStrip = menu;
         }
-        else
+        catch (Exception ex)
         {
-            _trayIcon.Icon = SystemIcons.Application;
+            File.WriteAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "icon_error.txt"), ex.ToString());
         }
-
-        _trayIcon.Text = "SysMonBar";
-        _trayIcon.Visible = true;
-
-        var menu = new System.Windows.Forms.ContextMenuStrip();
-        menu.Items.Add("📊 Analytics", null, (s, ev) => GetMainWin()?.OpenAnalytics());
-        menu.Items.Add("⚙️ Settings", null, (s, ev) => GetMainWin()?.OpenSettings());
-        menu.Items.Add(new System.Windows.Forms.ToolStripSeparator());
-        menu.Items.Add("❌ Exit", null, (s, ev) => Shutdown());
-
-        _trayIcon.ContextMenuStrip = menu;
     }
 
     protected override void OnExit(ExitEventArgs e)
