@@ -2,7 +2,7 @@
 
 **SysMonBar** is a sleek, professional-grade Windows system monitor designed to live discreetly on your taskbar. It provides real-time insights into your hardware performance while consuming almost zero resources.
 
-<img src="icon.png" alt="SysMonBar Icon" width="100"/>
+<img src="icon.png" alt="SysMonBar Icon" width="200"/>
 
 ## 🚀 Key Features
 
