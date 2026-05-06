@@ -1,70 +1,77 @@
-# SysMonBar 📊 - System Monitor Bar
+# SysMonBar 📊 - Ultra-Lightweight System Monitor
 
-A lightweight Windows system monitor that sits on your taskbar, showing real-time stats for CPU, RAM, GPU, Network, Power, and Temperature.
+**SysMonBar** is a sleek, professional-grade Windows system monitor designed to live discreetly on your taskbar. It provides real-time insights into your hardware performance while consuming almost zero resources.
 
-Built natively in **C# / WPF** for maximum performance and minimal resource usage.
+![SysMonBar Icon](icon.png)
 
-![SysMonBar Preview](icon.png)
+## 🚀 Key Features
 
-## Features
+- 🖥️ **CPU Usage** - Real-time load monitoring.
+- 💾 **RAM Consumption** - Track memory usage in GB.
+- 🎮 **GPU Performance** - Monitor load and temperatures.
+- 🌐 **Network Throughput** - Live Upload/Download speeds.
+- ⚡ **Power Draw** - Real-time wattage (Watts) for CPU and GPU.
+- 🌡️ **Thermals** - Stay on top of CPU and GPU temperatures.
+- 📊 **Analytics** - View historical usage and power cost estimation.
+- 🍃 **Ultra-Lightweight** - Optimized to run at just **20-30MB RAM**.
 
-- 🖥️ **CPU Usage** - Real-time CPU load with bar display
-- 💾 **RAM Usage** - Memory consumption in GB
-- 🎮 **GPU Usage** - GPU load via LibreHardwareMonitor
-- 🌐 **Network** - Upload/Download throughput
-- ⚡ **Power** - CPU/GPU power consumption in watts
-- 🌡️ **Temperature** - Combined CPU/GPU temperature
-- 🔔 **System Tray** - Runs quietly with tray icon and context menu
+---
 
-## Requirements
+## 📥 Installation (GitHub Release)
 
+If you just want to use the app without building it from source, follow these steps:
+
+1.  Go to the **[Releases](https://github.com/tanviralamtusar/SysMonBar/releases)** page.
+2.  Download the latest `SysMonBar_Installer.exe`.
+3.  Run the installer. 
+    > **Note:** The app requires **Administrator Privileges** to read hardware sensors and performance counters.
+4.  Once installed, the bar will appear at the bottom of your screen, and you'll find the icon in your **System Tray** (near the clock).
+
+---
+
+## ⚙️ Configuration
+
+- **Right-click** the SysMonBar icon in the system tray to access **Settings** or **Analytics**.
+- **Settings**: Change colors, toggle metrics, and adjust transparency.
+- **Analytics**: View power consumption graphs and set your local electricity rate to estimate monthly costs.
+
+---
+
+## 🛠️ Development (For Builders)
+
+If you want to contribute or build the app yourself:
+
+### Prerequisites
 - Windows 10/11
-- .NET 8.0 SDK (for development)
-- Run as **Administrator** for full sensor access
+- .NET 8.0 SDK
 
-## Build & Run
-
-```bash
+### Build & Run
+```powershell
 # Clone the repository
-git clone https://github.com/YOUR_USERNAME/SysMonBar.git
+git clone https://github.com/tanviralamtusar/SysMonBar.git
 cd SysMonBar
 
-# Build
+# Build the project
 dotnet build
 
-# Run (requires Administrator)
+# Run (as Administrator)
 dotnet run
 ```
 
-## Publish as EXE
-
-```bash
-dotnet publish -c Release -r win-x64 --self-contained -p:PublishSingleFile=true
+### Self-Contained Release Build
+To create the single-file executable used in the installer:
+```powershell
+dotnet publish -c Release -o publish
 ```
 
-The EXE will be in `bin/Release/net8.0-windows/win-x64/publish/`.
+---
 
-## Project Structure
+## 🧠 Tech Stack
 
-| File | Description |
-|------|-------------|
-| `MainWindow.xaml/.cs` | Main transparent bar UI |
-| `MetricControl.xaml/.cs` | Reusable bar widget for metrics |
-| `HardwareMonitor.cs` | Hardware sensor reading via LibreHardwareMonitor |
-| `App.xaml/.cs` | Application entry, system tray icon |
-| `app.manifest` | Admin privilege request |
-
-## Tech Stack
-
-- **Language:** C# 12
 - **Framework:** .NET 8.0 / WPF
-- **Hardware:** LibreHardwareMonitorLib (NuGet)
-- **Database:** Entity Framework Core + SQLite (for analytics)
+- **Hardware Engine:** [LibreHardwareMonitorLib](https://github.com/LibreHardwareMonitor/LibreHardwareMonitor)
+- **Database:** Raw SQLite (Microsoft.Data.Sqlite) for high-performance logging.
+- **Optimizations:** Workstation GC, Manual Working Set trimming, and native sensor polling.
 
-## License
-
+## 📄 License
 MIT License
-
-## Credits
-
-- [LibreHardwareMonitor](https://github.com/LibreHardwareMonitor/LibreHardwareMonitor) for hardware sensor access
