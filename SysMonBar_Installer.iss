@@ -4,7 +4,7 @@
 [Setup]
 AppId={{D3E5F6B7-C8A9-4B0D-9E1F-2A3B4C5D6E7F}}
 AppName=SysMonBar
-AppVersion=1.0
+AppVersion=2.0.2
 AppPublisher=SysMonBar Team
 DefaultDirName={commonpf}\SysMonBar
 DefaultGroupName=SysMonBar
