@@ -108,7 +108,7 @@ namespace SysMonBar
             InitializeComponent();
             this.DataContext = this;
             Settings = current;
-            Settings.RunOnStartup = CheckStartupStatus();
+            Settings.RunOnStartup = StartupManager.IsEnabled();
             LoadSettingsToUI();
         }
 
@@ -191,7 +191,7 @@ namespace SysMonBar
         private void btnSave_Click(object sender, RoutedEventArgs e)
         {
             SaveSettingsFromUI();
-            ToggleStartup(Settings.RunOnStartup);
+            StartupManager.Toggle(Settings.RunOnStartup);
 
             Saved = true;
             DialogResult = true;
@@ -204,40 +204,5 @@ namespace SysMonBar
             Close();
         }
 
-        private bool CheckStartupStatus()
-        {
-            try
-            {
-                using var key = Registry.CurrentUser.OpenSubKey(
-                    @"Software\Microsoft\Windows\CurrentVersion\Run", false);
-                return key?.GetValue("SysMonBar") != null;
-            }
-            catch { return false; }
-        }
-
-        private void ToggleStartup(bool enable)
-        {
-            try
-            {
-                using var key = Registry.CurrentUser.OpenSubKey(
-                    @"Software\Microsoft\Windows\CurrentVersion\Run", true);
-                if (key == null) return;
-
-                if (enable)
-                {
-                    var exePath = System.Diagnostics.Process.GetCurrentProcess().MainModule?.FileName;
-                    if (exePath != null)
-                        key.SetValue("SysMonBar", $"\"{exePath}\"");
-                }
-                else
-                {
-                    key.DeleteValue("SysMonBar", false);
-                }
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Startup toggle error: {ex.Message}");
-            }
-        }
     }
 }

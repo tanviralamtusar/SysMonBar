@@ -4,8 +4,8 @@
 [Setup]
 AppId={{D3E5F6B7-C8A9-4B0D-9E1F-2A3B4C5D6E7F}}
 AppName=SysMonBar
-AppVersion=2.0.2
-VersionInfoVersion=2.0.2.0
+AppVersion=2.1.0
+VersionInfoVersion=2.1.0.0
 AppPublisher=SysMonBar Team
 DefaultDirName={autopf}\SysMonBar
 ArchitecturesAllowed=x64compatible
@@ -16,7 +16,7 @@ DisableProgramGroupPage=yes
 ; Application icon
 UninstallDisplayIcon={app}\SysMonBar.exe
 SetupIconFile=icon.ico
-OutputDir=.
+OutputDir=.\Installer
 OutputBaseFilename=SysMonBar_Installer
 Compression=lzma
 SolidCompression=yes
