@@ -1,11 +1,24 @@
 ; Inno Setup Script for SysMonBar
 ; Build the installer by right-clicking this file and selecting "Compile" (requires Inno Setup installed)
+; CI can override these values with ISCC /DAppVersion=..., /DOutputBaseFilename=..., and /DPublishDir=...
+
+#ifndef AppVersion
+  #define AppVersion "2.1.0"
+#endif
+
+#ifndef OutputBaseFilename
+  #define OutputBaseFilename "SysMonBar_Installer"
+#endif
+
+#ifndef PublishDir
+  #define PublishDir "publish"
+#endif
 
 [Setup]
 AppId={{D3E5F6B7-C8A9-4B0D-9E1F-2A3B4C5D6E7F}}
 AppName=SysMonBar
-AppVersion=2.1.0
-VersionInfoVersion=2.1.0.0
+AppVersion={#AppVersion}
+VersionInfoVersion={#AppVersion}.0
 AppPublisher=SysMonBar Team
 DefaultDirName={autopf}\SysMonBar
 ArchitecturesAllowed=x64compatible
@@ -17,7 +30,7 @@ DisableProgramGroupPage=yes
 UninstallDisplayIcon={app}\SysMonBar.exe
 SetupIconFile=icon.ico
 OutputDir=.\Installer
-OutputBaseFilename=SysMonBar_Installer
+OutputBaseFilename={#OutputBaseFilename}
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
@@ -32,7 +45,7 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 
 [Files]
 ; Include all files from the publish directory
-Source: "publish\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "{#PublishDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; Include the ico file
 Source: "icon.ico"; DestDir: "{app}"; Flags: ignoreversion
 

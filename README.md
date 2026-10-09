@@ -64,6 +64,16 @@ To create the single-file executable used in the installer:
 dotnet publish -c Release -o publish
 ```
 
+### GitHub Releases
+Pushing a semantic version tag automatically builds the self-contained Windows app,
+creates the Inno Setup installer, generates a SHA-256 checksum, and publishes them
+to a GitHub Release. Tags must use the `vMAJOR.MINOR.PATCH` format.
+
+```powershell
+git tag v2.1.1
+git push origin v2.1.1
+```
+
 ---
 
 ## 🧠 Tech Stack

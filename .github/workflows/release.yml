@@ -1,0 +1,87 @@
+name: Build and release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build Windows installer and publish release
+    runs-on: windows-latest
+
+    steps:
+      - name: Check out the tagged source
+        uses: actions/checkout@v4
+
+      - name: Derive and validate the release version
+        id: version
+        shell: pwsh
+        run: |
+          $tag = '${{ github.ref_name }}'
+          if ($tag -notmatch '^v(?<version>\d+\.\d+\.\d+)$') {
+            throw "Release tags must use vMAJOR.MINOR.PATCH (for example, v2.1.1). Received: $tag"
+          }
+          "value=$($Matches.version)" >> $env:GITHUB_OUTPUT
+
+      - name: Set up .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restore dependencies
+        run: dotnet restore SysMonBar.csproj
+
+      - name: Build the application
+        run: dotnet build SysMonBar.csproj --configuration Release --no-restore -p:Version=${{ steps.version.outputs.value }}
+
+      - name: Publish the self-contained application
+        run: dotnet publish SysMonBar.csproj --configuration Release --no-restore -p:Version=${{ steps.version.outputs.value }} --output dist/publish
+
+      - name: Verify the published executable
+        shell: pwsh
+        run: |
+          if (-not (Test-Path 'dist/publish/SysMonBar.exe')) {
+            throw 'The publish step did not produce SysMonBar.exe.'
+          }
+
+      - name: Install Inno Setup
+        run: choco install innosetup --yes --no-progress
+
+      - name: Build the Windows installer
+        shell: pwsh
+        env:
+          RELEASE_VERSION: ${{ steps.version.outputs.value }}
+        run: |
+          $iscc = Join-Path ${env:ProgramFiles(x86)} 'Inno Setup 6/ISCC.exe'
+          if (-not (Test-Path $iscc)) {
+            throw "Inno Setup compiler was not found at $iscc."
+          }
+          New-Item -ItemType Directory -Force -Path dist/installer | Out-Null
+          & $iscc "/DAppVersion=$env:RELEASE_VERSION" "/DOutputBaseFilename=SysMonBar_Installer_$env:RELEASE_VERSION" '/DPublishDir=dist\publish' '/Odist/installer' 'SysMonBar_Installer.iss'
+          if ($LASTEXITCODE -ne 0) {
+            throw "Inno Setup failed with exit code $LASTEXITCODE."
+          }
+
+      - name: Generate release checksums
+        shell: pwsh
+        run: |
+          $installer = @(Get-ChildItem 'dist/installer/SysMonBar_Installer_*.exe')
+          if ($installer.Count -ne 1) {
+            throw "Expected one installer, found $($installer.Count)."
+          }
+          Get-FileHash $installer.FullName -Algorithm SHA256 |
+            ForEach-Object { "$($_.Hash.ToLowerInvariant())  $($_.Path | Split-Path -Leaf)" } |
+            Set-Content -NoNewline 'dist/checksums.txt'
+
+      - name: Publish the GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: |
+            dist/installer/SysMonBar_Installer_*.exe
+            dist/checksums.txt
+          fail_on_unmatched_files: true
