@@ -220,6 +220,17 @@
                         </Grid>
 
                         <Separator/>
+
+                        <!-- Storage -->
+                        <Grid>
+                            <TextBlock Text="Storage drives" Style="{StaticResource PropertyLabel}"/>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                <ComboBox x:Name="cbStorageColor" Style="{StaticResource ColorPickerStyle}" ItemsSource="{Binding AvailableColors}" SelectedValuePath="Hex" Margin="0,0,12,0"/>
+                                <CheckBox x:Name="chkStorage" Style="{StaticResource SwitchStyle}"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <Separator/>
                         
                         <!-- Network -->
                         <Grid>

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Management;
+using System.Text.RegularExpressions;
 using System.Threading;
 using LibreHardwareMonitor.Hardware;
 using System.Runtime.Versioning;
@@ -24,6 +25,29 @@ namespace SysMonBar
         public float CombinedTemp => Math.Max(CpuTemp, GpuTemp);
         public double NetUp { get; set; }
         public double NetDown { get; set; }
+        public List<DriveStats> Drives { get; set; } = new();
+    }
+
+    public class DriveStats
+    {
+        public string Id { get; set; } = string.Empty;
+        public int? Index { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public float UsedGb { get; set; }
+        public float TotalGb { get; set; }
+        public float? TemperatureC { get; set; }
+        public float? ActivityPercent { get; set; }
+
+        public DriveStats Clone() => new()
+        {
+            Id = Id,
+            Index = Index,
+            Name = Name,
+            UsedGb = UsedGb,
+            TotalGb = TotalGb,
+            TemperatureC = TemperatureC,
+            ActivityPercent = ActivityPercent
+        };
     }
 
     [SupportedOSPlatform("windows")]
@@ -65,6 +89,9 @@ namespace SysMonBar
         private bool _isDisposed;
         private Thread? _wmiThread;
         private readonly UpdateVisitor _visitor = new();
+        private readonly object _driveLock = new();
+        private List<DriveStats> _driveInventory = new();
+        private DateTime _lastDriveInventoryRefresh = DateTime.MinValue;
 
         public HardwareMonitor()
         {
@@ -96,6 +123,7 @@ namespace SysMonBar
                     IsCpuEnabled = true,
                     IsGpuEnabled = true,
                     IsMemoryEnabled = true,
+                    IsStorageEnabled = true,
                     IsNetworkEnabled = false, // Use PerformanceCounters instead
                     IsMotherboardEnabled = false // Very heavy, disabling for 20MB target
                 };
@@ -119,6 +147,11 @@ namespace SysMonBar
         {
             while (!_isDisposed)
             {
+                if ((DateTime.UtcNow - _lastDriveInventoryRefresh).TotalSeconds >= 30)
+                {
+                    RefreshDriveInventory();
+                }
+
                 try
                 {
                     using var searcher = new ManagementObjectSearcher(@"root\WMI", "SELECT CurrentTemperature FROM MSAcpi_ThermalZoneTemperature");
@@ -145,6 +178,87 @@ namespace SysMonBar
                 {
                     Thread.Sleep(100);
                 }
+            }
+        }
+
+        private void RefreshDriveInventory()
+        {
+            try
+            {
+                var logicalDisks = new Dictionary<string, (ulong Total, ulong Free)>(StringComparer.OrdinalIgnoreCase);
+                using (var logicalDiskSearcher = new ManagementObjectSearcher(
+                    "SELECT DeviceID, Size, FreeSpace FROM Win32_LogicalDisk WHERE DriveType = 3"))
+                {
+                    foreach (ManagementObject disk in logicalDiskSearcher.Get())
+                    {
+                        string? id = disk["DeviceID"]?.ToString();
+                        if (string.IsNullOrWhiteSpace(id)) continue;
+                        if (ulong.TryParse(disk["Size"]?.ToString(), out ulong total) &&
+                            ulong.TryParse(disk["FreeSpace"]?.ToString(), out ulong free))
+                        {
+                            logicalDisks[id] = (total, free);
+                        }
+                    }
+                }
+
+                var diskCapacity = new Dictionary<int, (ulong Total, ulong Free)>();
+                using (var associationSearcher = new ManagementObjectSearcher("SELECT Antecedent, Dependent FROM Win32_LogicalDiskToPartition"))
+                {
+                    foreach (ManagementObject association in associationSearcher.Get())
+                    {
+                        string antecedent = association["Antecedent"]?.ToString() ?? string.Empty;
+                        string dependent = association["Dependent"]?.ToString() ?? string.Empty;
+                        Match diskMatch = Regex.Match(antecedent, @"Disk #(\d+),");
+                        Match driveMatch = Regex.Match(dependent, @"DeviceID=""(?<id>[^""]+)""");
+                        if (!diskMatch.Success || !driveMatch.Success ||
+                            !int.TryParse(diskMatch.Groups[1].Value, out int diskIndex) ||
+                            !logicalDisks.TryGetValue(driveMatch.Groups["id"].Value, out var capacity))
+                        {
+                            continue;
+                        }
+
+                        if (diskCapacity.TryGetValue(diskIndex, out var existing))
+                            diskCapacity[diskIndex] = (existing.Total + capacity.Total, existing.Free + capacity.Free);
+                        else
+                            diskCapacity[diskIndex] = capacity;
+                    }
+                }
+
+                var discoveredDrives = new List<DriveStats>();
+                using (var physicalDiskSearcher = new ManagementObjectSearcher("SELECT Index, Model, Size FROM Win32_DiskDrive"))
+                {
+                    foreach (ManagementObject disk in physicalDiskSearcher.Get())
+                    {
+                        if (!int.TryParse(disk["Index"]?.ToString(), out int index)) continue;
+
+                        ulong physicalSize = 0;
+                        ulong.TryParse(disk["Size"]?.ToString(), out physicalSize);
+                        diskCapacity.TryGetValue(index, out var mappedCapacity);
+                        ulong total = mappedCapacity.Total > 0 ? mappedCapacity.Total : physicalSize;
+                        ulong used = mappedCapacity.Total > 0 ? mappedCapacity.Total - mappedCapacity.Free : 0;
+                        string model = disk["Model"]?.ToString()?.Trim() ?? "Storage device";
+
+                        discoveredDrives.Add(new DriveStats
+                        {
+                            Id = $"disk-{index}",
+                            Index = index,
+                            Name = $"Disk {index}: {model}",
+                            TotalGb = total / (1024f * 1024f * 1024f),
+                            UsedGb = used / (1024f * 1024f * 1024f)
+                        });
+                    }
+                }
+
+                lock (_driveLock)
+                {
+                    _driveInventory = discoveredDrives.OrderBy(drive => drive.Index).ToList();
+                    _lastDriveInventoryRefresh = DateTime.UtcNow;
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Drive inventory update failed: {ex.Message}");
+                _lastDriveInventoryRefresh = DateTime.UtcNow;
             }
         }
 
@@ -209,6 +323,11 @@ namespace SysMonBar
         {
             UpdateDynamicCounters();
             var stats = new HardwareStats { RamTotalGb = _totalRamGb };
+
+            lock (_driveLock)
+            {
+                stats.Drives = _driveInventory.Select(drive => drive.Clone()).ToList();
+            }
 
 
             if (_computer != null)
@@ -323,6 +442,28 @@ namespace SysMonBar
                                     else if (name.Contains("Download")) stats.NetDown += value;
                                 }
                             }
+                            else if (hw.HardwareType == HardwareType.Storage)
+                            {
+                                var drive = FindDriveForHardware(stats.Drives, hw.Name);
+                                if (drive == null)
+                                {
+                                    drive = new DriveStats
+                                    {
+                                        Id = $"sensor-{hw.Identifier}",
+                                        Name = hw.Name
+                                    };
+                                    stats.Drives.Add(drive);
+                                }
+
+                                if (sensor.SensorType == SensorType.Temperature && value > 0 && value < 150)
+                                {
+                                    drive.TemperatureC = value;
+                                }
+                                else if (sensor.SensorType == SensorType.Load && value >= 0 && value <= 100)
+                                {
+                                    drive.ActivityPercent = value;
+                                }
+                            }
                             else if (hw.HardwareType == HardwareType.Motherboard)
                             {
                                 // Fallbacks for systems where CPU doesn't report itself
@@ -421,6 +562,27 @@ namespace SysMonBar
                 stats.GpuTemp = 45f + (stats.GpuUsage / 100f) * 40f;
 
             return stats;
+        }
+
+        private static DriveStats? FindDriveForHardware(IEnumerable<DriveStats> drives, string hardwareName)
+        {
+            string normalizedHardwareName = NormalizeDriveName(hardwareName);
+            if (string.IsNullOrEmpty(normalizedHardwareName)) return null;
+
+            return drives
+                .OrderByDescending(drive => NormalizeDriveName(drive.Name).Length)
+                .FirstOrDefault(drive =>
+                {
+                    string normalizedDriveName = NormalizeDriveName(drive.Name);
+                    return normalizedDriveName.Contains(normalizedHardwareName, StringComparison.Ordinal) ||
+                           normalizedHardwareName.Contains(normalizedDriveName, StringComparison.Ordinal);
+                });
+        }
+
+        private static string NormalizeDriveName(string name)
+        {
+            return new string(name.Where(char.IsLetterOrDigit).ToArray()).ToUpperInvariant()
+                .Replace("DISK", string.Empty, StringComparison.Ordinal);
         }
 
         public void Dispose()

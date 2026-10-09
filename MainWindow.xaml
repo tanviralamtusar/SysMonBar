@@ -13,6 +13,7 @@
             <local:MetricControl x:Name="RamMetric" Margin="1,0" ToolTip="RAM"/>
             <local:MetricControl x:Name="GpuMetric" Margin="1,0" ToolTip="GPU"/>
             <local:MetricControl x:Name="NetMetric" Margin="1,0" ToolTip="Network"/>
+            <StackPanel x:Name="StorageMetricsPanel" Orientation="Horizontal" VerticalAlignment="Center"/>
 
             <TextBlock x:Name="PowerText" Text="0W"
                        FontFamily="Segoe UI" FontSize="9" FontWeight="Bold"

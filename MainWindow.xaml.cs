@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Input;
@@ -19,6 +21,7 @@ namespace SysMonBar
         private readonly DispatcherTimer _topMostTimer;
         private AppSettings _settings;
         private DateTime _lastLogTime = DateTime.Now;
+        private readonly Dictionary<string, MetricControl> _storageMetrics = new();
 
         // Win32 API for staying above taskbar
         [DllImport("user32.dll")]
@@ -185,6 +188,8 @@ namespace SysMonBar
                 string netText = FormatNet(netDown, _settings.NetUnit) + " / " + FormatNet(netUp, _settings.NetUnit);
                 NetMetric.ToolTip = $"↓{FormatNet(netDown, _settings.NetUnit)}  ↑{FormatNet(netUp, _settings.NetUnit)}";
 
+                UpdateStorageMetrics(stats.Drives);
+
                 // Power
                 if (_settings.ShowPower) { PowerText.Visibility = Visibility.Visible; }
                 else { PowerText.Visibility = Visibility.Collapsed; }
@@ -208,6 +213,43 @@ namespace SysMonBar
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Update error: {ex.Message}");
+            }
+        }
+
+        private void UpdateStorageMetrics(IEnumerable<DriveStats> drives)
+        {
+            StorageMetricsPanel.Visibility = _settings.ShowStorage ? Visibility.Visible : Visibility.Collapsed;
+            if (!_settings.ShowStorage) return;
+
+            var activeDriveIds = new HashSet<string>();
+            foreach (var drive in drives.OrderBy(drive => drive.Index ?? int.MaxValue).ThenBy(drive => drive.Name))
+            {
+                activeDriveIds.Add(drive.Id);
+                if (!_storageMetrics.TryGetValue(drive.Id, out var metric))
+                {
+                    metric = new MetricControl { Margin = new Thickness(1, 0, 1, 0) };
+                    _storageMetrics[drive.Id] = metric;
+                    StorageMetricsPanel.Children.Add(metric);
+                }
+
+                double usagePercent = drive.TotalGb > 0 ? drive.UsedGb / drive.TotalGb * 100 : drive.ActivityPercent ?? 0;
+                metric.Value = usagePercent;
+                metric.MaxValue = 100;
+                metric.GraphWidth = _settings.GraphWidth;
+                metric.Color = GetBrush(_settings.StorageColor);
+                metric.DisplayMode = _settings.DisplayMode;
+                metric.TextValue = drive.Index.HasValue ? $"D{drive.Index} {usagePercent:F0}%" : $"DRV {usagePercent:F0}%";
+
+                var tooltip = $"{drive.Name}\nUsed: {drive.UsedGb:F1} / {drive.TotalGb:F1} GB ({usagePercent:F0}%)";
+                if (drive.TemperatureC.HasValue) tooltip += $"\nTemperature: {drive.TemperatureC:F0}°C";
+                if (drive.ActivityPercent.HasValue) tooltip += $"\nActivity: {drive.ActivityPercent:F0}%";
+                metric.ToolTip = tooltip;
+            }
+
+            foreach (var staleDrive in _storageMetrics.Where(entry => !activeDriveIds.Contains(entry.Key)).ToList())
+            {
+                StorageMetricsPanel.Children.Remove(staleDrive.Value);
+                _storageMetrics.Remove(staleDrive.Key);
             }
         }
 

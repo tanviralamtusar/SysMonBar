@@ -14,6 +14,7 @@ namespace SysMonBar
         public bool ShowRam { get; set; } = true;
         public bool ShowGpu { get; set; } = true;
         public bool ShowNet { get; set; } = true;
+        public bool ShowStorage { get; set; } = true;
         public bool ShowPower { get; set; } = true;
         public bool ShowTemp { get; set; } = true;
         
@@ -21,6 +22,7 @@ namespace SysMonBar
         public string RamColor { get; set; } = "#9b59b6";
         public string GpuColor { get; set; } = "#2ecc71";
         public string NetColor { get; set; } = "#1abc9c";
+        public string StorageColor { get; set; } = "#f1c40f";
         public string PowerColor { get; set; } = "#e67e22";
         public string TempColor { get; set; } = "#e74c3c";
 
@@ -118,6 +120,7 @@ namespace SysMonBar
             chkRam.IsChecked = Settings.ShowRam;
             chkGpu.IsChecked = Settings.ShowGpu;
             chkNet.IsChecked = Settings.ShowNet;
+            chkStorage.IsChecked = Settings.ShowStorage;
             chkPower.IsChecked = Settings.ShowPower;
             chkTemp.IsChecked = Settings.ShowTemp;
             chkStartup.IsChecked = Settings.RunOnStartup;
@@ -127,6 +130,7 @@ namespace SysMonBar
             cbRamColor.SelectedValue = Settings.RamColor;
             cbGpuColor.SelectedValue = Settings.GpuColor;
             cbNetColor.SelectedValue = Settings.NetColor;
+            cbStorageColor.SelectedValue = Settings.StorageColor;
             cbPowerColor.SelectedValue = Settings.PowerColor;
             cbTempColor.SelectedValue = Settings.TempColor;
 
@@ -150,6 +154,7 @@ namespace SysMonBar
             Settings.ShowRam = chkRam.IsChecked ?? true;
             Settings.ShowGpu = chkGpu.IsChecked ?? true;
             Settings.ShowNet = chkNet.IsChecked ?? true;
+            Settings.ShowStorage = chkStorage.IsChecked ?? true;
             Settings.ShowPower = chkPower.IsChecked ?? true;
             Settings.ShowTemp = chkTemp.IsChecked ?? true;
             Settings.RunOnStartup = chkStartup.IsChecked ?? false;
@@ -159,6 +164,7 @@ namespace SysMonBar
             if (cbRamColor.SelectedValue != null) Settings.RamColor = cbRamColor.SelectedValue.ToString()!;
             if (cbGpuColor.SelectedValue != null) Settings.GpuColor = cbGpuColor.SelectedValue.ToString()!;
             if (cbNetColor.SelectedValue != null) Settings.NetColor = cbNetColor.SelectedValue.ToString()!;
+            if (cbStorageColor.SelectedValue != null) Settings.StorageColor = cbStorageColor.SelectedValue.ToString()!;
             if (cbPowerColor.SelectedValue != null) Settings.PowerColor = cbPowerColor.SelectedValue.ToString()!;
             if (cbTempColor.SelectedValue != null) Settings.TempColor = cbTempColor.SelectedValue.ToString()!;
 
